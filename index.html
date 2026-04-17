@@ -257,6 +257,28 @@ textarea.adj-input{resize:none;line-height:1.55}
 .proceed-btn:disabled{background:var(--surface2);color:var(--text3);box-shadow:none;cursor:default}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.acw-wrap{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+.acw-intent{background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,0.07);padding:10px 14px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.acw-intent-icon{width:32px;height:32px;border-radius:9px;background:#FFF7ED;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.acw-intent-lbl{font-size:11px;color:#94A3B8;font-weight:500;margin-bottom:2px}
+.acw-intent-val{font-size:13px;font-weight:600;color:#0F172A}
+.acw-intent-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:#FFF7ED;color:#9B4D08;border:1px solid rgba(224,120,32,0.2);flex-shrink:0}
+.acw-box{background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,0.07);box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;flex-direction:column;overflow:hidden;flex:1;min-height:0}
+.acw-msgs{flex:1;padding:14px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.acw-msg{max-width:90%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;font-family:inherit}
+.acw-msg.sys{align-self:flex-start;background:#F8F9FB;color:#64748B;border:1px solid rgba(0,0,0,0.07);border-bottom-left-radius:3px}
+.acw-msg.user{align-self:flex-end;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;border-bottom-right-radius:3px}
+.acw-msg.ai{align-self:flex-start;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-bottom-left-radius:3px}
+.acw-inp{border-top:1px solid rgba(0,0,0,0.07);display:flex;flex-shrink:0}
+.acw-inp input{flex:1;border:none;outline:none;padding:11px 14px;font-size:13px;color:#0F172A;background:transparent;font-family:inherit}
+.acw-inp input::placeholder{color:#94A3B8}
+.acw-inp button{padding:11px 18px;background:none;border:none;border-left:1px solid rgba(0,0,0,0.07);cursor:pointer;color:#E07820;font-size:13px;font-weight:600;font-family:inherit}
+.acw-inp button:hover{background:#FFF7ED}
+.acw-dots span{animation:acw-blink 1.2s ease-in-out infinite}
+.acw-dots span:nth-child(2){animation-delay:.2s}
+.acw-dots span:nth-child(3){animation-delay:.4s}
+@keyframes acw-blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
 </style>
 </head>
 <body>
@@ -325,7 +347,29 @@ textarea.adj-input{resize:none;line-height:1.55}
         <div class="stat-card"><div class="sc-lbl">已完成</div><div class="sc-val">47</div><div class="pill pill-gr">本季度</div></div>
         <div class="stat-card"><div class="sc-lbl">涉及组织</div><div class="sc-val">6</div><div class="pill pill-pu">活跃</div></div>
       </div>
-      <div id="ai-chat-widget"></div>
+      <div class="acw-wrap">
+        <div class="acw-intent" id="acw-intent" style="display:none">
+          <div class="acw-intent-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E07820" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <div style="flex:1">
+            <div class="acw-intent-lbl">AI 识别意图</div>
+            <div class="acw-intent-val" id="acw-intent-val">—</div>
+          </div>
+          <div class="acw-intent-tag">已识别</div>
+        </div>
+        <div class="acw-box">
+          <div class="acw-msgs" id="acw-msgs">
+            <div class="acw-msg sys">你好！我是 HR 审批助手。请告诉我你想发起什么审批，或直接在右侧目录中选择。</div>
+          </div>
+          <div class="acw-inp">
+            <input id="acw-input" placeholder="描述你要发起的审批，如：我要调整组织架构…" />
+            <button onclick="AIChatWidget.send()">发送</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="dash-right">
       <div class="cat-head"><div class="cat-title">流程目录</div><div class="cat-sub">选择要发起的审批类型</div></div>
@@ -1127,6 +1171,12 @@ async function saveModal(){
 // START
 // ══════════════════════════════════════════
 init();
+
+// 绑定聊天框回车键
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('acw-input');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') AIChatWidget.send(); });
+});
 </script>
 <script src="ai-chat.js"></script>
 </body>
