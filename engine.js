@@ -8,8 +8,12 @@
 //   ④ 改 R/A/C/I 的合并方式  → 改 computeChain()
 //
 // context 的两个来源：
-//   ① org 固定属性（从数据库orgs表读）：L4=层级, L5=类型, region=区域
-//   ② 发起人填写的额外条件（extraContext）：L3=申请范围, is_sensitive=是否敏感, 等
+//   ① org 固定属性（数据库orgs表）：L4=层级, L5=类型, region=区域
+//   ② 发起人填写的额外条件（extraContext）：如 L3=申请范围, is_sensitive=是否敏感
+//
+// L3 的特殊处理：
+//   - extraContext 里有 L3 → 用发起人填的值匹配（如申请范围：全集团/跨部门/部门内）
+//   - extraContext 里没有 L3 → 跳过（L3此时是流程分类名称，如"组织架构设置"）
 // ═══════════════════════════════════════════════════════════
 
 const FLOW_RULE_MAP = {
@@ -20,18 +24,17 @@ const FLOW_RULE_MAP = {
   'it_perm':    'HR_DIGI_WF_02',
 };
 
-const SKIP_COND_KEYS = ['L1', 'L2'];
+// 永远跳过的流程分类维度（已通过rule_id前缀过滤）
+const ALWAYS_SKIP = ['L1', 'L2'];
 
-// org固定属性映射
 function buildContext(org) {
   return {
-    'L4':     org.grade,   // 组织层级
-    'L5':     org.type,    // 组织类型
-    'region': org.region,  // 所属区域
+    'L4':     org.grade,
+    'L5':     org.type,
+    'region': org.region,
   };
 }
 
-// 单个条件匹配
 function matchVal(ruleVal, inputVal) {
   if (ruleVal === undefined || ruleVal === null) return true;
   if (inputVal === undefined || inputVal === null) return false;
@@ -42,7 +45,6 @@ function matchVal(ruleVal, inputVal) {
   return false;
 }
 
-// 区域匹配（有特殊逻辑）
 function matchRegion(ruleRegion, inputRegion) {
   if (!ruleRegion || ruleRegion === 'Any') return true;
   if (ruleRegion === '集团总部') return true;
@@ -53,13 +55,8 @@ function matchRegion(ruleRegion, inputRegion) {
   return false;
 }
 
-// 主函数：计算审批链
-// org         — 目标组织 { grade, type, region, path }
-// flowKey     — 流程 key（如 'org_adjust'）
-// rules       — 数据库全部 approval_rules
-// extraContext — 发起人填写的额外条件 { L3: "跨部门", is_sensitive: "涉及敏感", ... }
 function computeChain(org, flowKey, rules, extraContext = {}) {
-  // 合并两部分 context
+  // 合并 org固定属性 + 发起人额外条件
   const ctx = { ...buildContext(org), ...extraContext };
 
   // Step 1: 按流程前缀过滤
@@ -72,9 +69,21 @@ function computeChain(org, flowKey, rules, extraContext = {}) {
   const matched = flowRules.filter(rule => {
     const cond = rule.conditions || {};
     return Object.entries(cond).every(([k, v]) => {
-      if (SKIP_COND_KEYS.includes(k)) return true;
+      // L1/L2 永远跳过
+      if (ALWAYS_SKIP.includes(k)) return true;
+
+      // L3 特殊处理：
+      //   发起人填了 → 用填的值匹配
+      //   发起人没填 → 跳过（L3此时是流程名称，不参与匹配）
+      if (k === 'L3') {
+        if (extraContext.L3) return matchVal(v, extraContext.L3);
+        return true; // 没填则跳过
+      }
+
+      // region 用专门函数
       if (k === 'region') return matchRegion(v, ctx['region']);
-      // L3 在部分流程里是发起人选的（如申请范围），优先用extraContext里的值
+
+      // 其他维度
       return matchVal(v, ctx[k]);
     });
   }).filter(r => r.role_key);
@@ -85,13 +94,13 @@ function computeChain(org, flowKey, rules, extraContext = {}) {
   const allC = matched.filter(r => r.raci === 'C');
   const allI = matched.filter(r => r.raci === 'I');
 
-  // R: unique
+  // R: unique — 取 order_num 最大的一条
   const R = allR.length ? [allR.sort((a,b) => b.order_num - a.order_num)[0]] : [];
-  // A: unique
+  // A: unique — 取 order_num 最大的一条
   const A = allA.length ? [allA.sort((a,b) => b.order_num - a.order_num)[0]] : [];
-  // C: collect, order从小到大
+  // C: collect — order 从小到大
   const C = allC.sort((a,b) => a.order_num - b.order_num);
-  // I: collect, order从小到大
+  // I: collect — order 从小到大
   const I = allI.sort((a,b) => a.order_num - b.order_num);
 
   return [...R, ...C, ...A, ...I];
