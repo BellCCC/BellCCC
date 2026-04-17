@@ -105,16 +105,16 @@ function computeChain(org, flowKey, rules, extraCtx = {}) {
 
   // Step 3: 按RACI分组
   const allR = matched.filter(r => r.raci === 'R');
-  const allA = matched.filter(r => r.raci === 'A');
   const allC = matched.filter(r => r.raci === 'C');
+  const allA = matched.filter(r => r.raci === 'A');
   const allI = matched.filter(r => r.raci === 'I');
 
   // R: unique — order_num最大的一条
   const R = allR.length ? [allR.sort((a,b) => b.order_num - a.order_num)[0]] : [];
-  // A: unique — order_num最大的一条
-  const A = allA.length ? [allA.sort((a,b) => b.order_num - a.order_num)[0]] : [];
   // C: collect — order_num从小到大
   const C = allC.sort((a,b) => a.order_num - b.order_num);
+  // A: unique — order_num最大的一条
+  const A = allA.length ? [allA.sort((a,b) => b.order_num - a.order_num)[0]] : [];
   // I: collect — order_num从小到大
   const I = allI.sort((a,b) => a.order_num - b.order_num);
 
