@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// engine.js — 领益智造 HR 审批链匹配引擎 v2
+// engine.js — 领益智造 HR 审批链匹配引擎 v3
 //
 // 什么时候改这里：
 //   ① 新增流程类型          → 改 FLOW_RULE_MAP
@@ -7,13 +7,9 @@
 //   ③ 新增特殊条件值逻辑     → 改 matchVal() / matchRegion()
 //   ④ 改 R/A/C/I 的合并方式  → 改 computeChain()
 //
-// 条件值在数据库里的格式（jsonb对象）：
-//   精确匹配：  "三级组织"
-//   包含列表：  {"in": ["一级组织","二级组织"]}
-//   排除列表：  {"not": ["运营"]}
-//   区域包含：  {"contains": "华东"}
-//   数据量：    {"gte": 10000}
-//   通配：      字段不存在 = Any，全部通过
+// context 的两个来源：
+//   ① org 固定属性（从数据库orgs表读）：L4=层级, L5=类型, region=区域
+//   ② 发起人填写的额外条件（extraContext）：L3=申请范围, is_sensitive=是否敏感, 等
 // ═══════════════════════════════════════════════════════════
 
 const FLOW_RULE_MAP = {
@@ -24,16 +20,18 @@ const FLOW_RULE_MAP = {
   'it_perm':    'HR_DIGI_WF_02',
 };
 
-const SKIP_COND_KEYS = ['L1', 'L2', 'L3'];
+const SKIP_COND_KEYS = ['L1', 'L2'];
 
+// org固定属性映射
 function buildContext(org) {
   return {
-    'L4':     org.grade,
-    'L5':     org.type,
-    'region': org.region,
+    'L4':     org.grade,   // 组织层级
+    'L5':     org.type,    // 组织类型
+    'region': org.region,  // 所属区域
   };
 }
 
+// 单个条件匹配
 function matchVal(ruleVal, inputVal) {
   if (ruleVal === undefined || ruleVal === null) return true;
   if (inputVal === undefined || inputVal === null) return false;
@@ -44,6 +42,7 @@ function matchVal(ruleVal, inputVal) {
   return false;
 }
 
+// 区域匹配（有特殊逻辑）
 function matchRegion(ruleRegion, inputRegion) {
   if (!ruleRegion || ruleRegion === 'Any') return true;
   if (ruleRegion === '集团总部') return true;
@@ -54,28 +53,45 @@ function matchRegion(ruleRegion, inputRegion) {
   return false;
 }
 
-function computeChain(org, flowKey, rules) {
-  const ctx = buildContext(org);
-  const flowPrefix = FLOW_RULE_MAP[flowKey] || '';
-  const flowRules = flowPrefix ? rules.filter(r => r.rule_id && r.rule_id.startsWith(flowPrefix)) : rules;
+// 主函数：计算审批链
+// org         — 目标组织 { grade, type, region, path }
+// flowKey     — 流程 key（如 'org_adjust'）
+// rules       — 数据库全部 approval_rules
+// extraContext — 发起人填写的额外条件 { L3: "跨部门", is_sensitive: "涉及敏感", ... }
+function computeChain(org, flowKey, rules, extraContext = {}) {
+  // 合并两部分 context
+  const ctx = { ...buildContext(org), ...extraContext };
 
+  // Step 1: 按流程前缀过滤
+  const flowPrefix = FLOW_RULE_MAP[flowKey] || '';
+  const flowRules = flowPrefix
+    ? rules.filter(r => r.rule_id && r.rule_id.startsWith(flowPrefix))
+    : rules;
+
+  // Step 2: DMN 决策表匹配
   const matched = flowRules.filter(rule => {
     const cond = rule.conditions || {};
     return Object.entries(cond).every(([k, v]) => {
       if (SKIP_COND_KEYS.includes(k)) return true;
       if (k === 'region') return matchRegion(v, ctx['region']);
+      // L3 在部分流程里是发起人选的（如申请范围），优先用extraContext里的值
       return matchVal(v, ctx[k]);
     });
   }).filter(r => r.role_key);
 
+  // Step 3: 分组
   const allR = matched.filter(r => r.raci === 'R');
   const allA = matched.filter(r => r.raci === 'A');
   const allC = matched.filter(r => r.raci === 'C');
   const allI = matched.filter(r => r.raci === 'I');
 
+  // R: unique
   const R = allR.length ? [allR.sort((a,b) => b.order_num - a.order_num)[0]] : [];
+  // A: unique
   const A = allA.length ? [allA.sort((a,b) => b.order_num - a.order_num)[0]] : [];
+  // C: collect, order从小到大
   const C = allC.sort((a,b) => a.order_num - b.order_num);
+  // I: collect, order从小到大
   const I = allI.sort((a,b) => a.order_num - b.order_num);
 
   return [...R, ...C, ...A, ...I];
