@@ -118,6 +118,6 @@ function computeChain(org, flowKey, rules, extraCtx = {}) {
   // I: collect — order_num从小到大
   const I = allI.sort((a,b) => a.order_num - b.order_num);
 
-  // 顺序：R → A → C → I
-  return [...R, ...A, ...C, ...I];
+  // 顺序：R → C → A → I
+  return [...R, ...C, ...A, ...I];
 }
