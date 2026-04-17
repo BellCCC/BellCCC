@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>领益智造 HR · 审批系统</title>
+<script src="engine.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --or:#E07820;--or-lt:#FFF7ED;--or-bd:rgba(224,120,32,0.2);--or-dk:#9B4D08;
@@ -17,197 +18,75 @@
   --purple:#7C3AED;--purple-lt:#F5F3FF;--purple-bd:#DDD6FE;
   --red:#DC2626;--red-lt:#FEF2F2;--red-bd:#FECACA;
   --font:'DM Sans',-apple-system,sans-serif;--mono:'DM Mono',monospace;
-  --r:14px;--r-sm:9px;--r-pill:100px;
-  --shadow:0 1px 4px rgba(0,0,0,0.06);
+  --r:14px;--r-sm:9px;--r-pill:100px;--shadow:0 1px 4px rgba(0,0,0,0.06);
 }
-body{font-family:var(--font);background:#D8DBE2;color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px 20px 40px}
-.page{display:none;width:100%;max-width:1200px}
-.page.active{display:flex;flex-direction:column;border-radius:18px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.15);min-height:calc(100vh - 68px)}
-.shell{display:grid;grid-template-columns:58px 1fr;flex:1}
-.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:4px;width:58px}
-.sb-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#FF6B35,#E07820);display:flex;align-items:center;justify-content:center;margin-bottom:12px;cursor:pointer;flex-shrink:0}
-.sb-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);transition:all .15s}
-.sb-icon:hover{background:var(--surface2);color:var(--text2)}
-.sb-icon.active{background:var(--or-lt);color:var(--or)}
-.sb-div{width:28px;height:1px;background:var(--border);margin:6px 0}
-.main{display:flex;flex-direction:column;min-width:0;background:var(--bg)}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.tb-title{font-size:20px;font-weight:600;color:var(--text);flex:1;letter-spacing:-0.02em}
+body{font-family:var(--font);background:#D8DBE2;color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+.page{display:none}
+.page.active{display:flex}
+
+/* ── LOGIN ── */
+#page-login{min-height:100vh;align-items:center;justify-content:center;flex-direction:column;gap:0}
+.login-card{background:var(--surface);border-radius:20px;padding:40px;width:380px;box-shadow:0 8px 40px rgba(0,0,0,0.12);display:flex;flex-direction:column;gap:24px}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.login-logo-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#FF6B35,#E07820);display:flex;align-items:center;justify-content:center}
+.login-title{font-size:20px;font-weight:600;color:var(--text);letter-spacing:-0.02em}
+.login-sub{font-size:13px;color:var(--text3)}
+.login-fields{display:flex;flex-direction:column;gap:14px}
+.login-field{display:flex;flex-direction:column;gap:6px}
+.login-lbl{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.login-input{font-size:14px;color:var(--text);padding:10px 14px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);outline:none;font-family:var(--font);transition:all .12s}
+.login-input:focus{border-color:var(--or);background:var(--surface);box-shadow:0 0 0 3px rgba(224,120,32,.1)}
+.login-btn{width:100%;padding:12px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(224,120,32,0.3)}
+.login-btn:hover{opacity:.92}
+.login-err{font-size:13px;color:var(--red);text-align:center;display:none}
+.login-hint{font-size:11px;color:var(--text3);text-align:center}
+.login-roles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.role-chip{font-size:11px;padding:4px 12px;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .12s}
+.role-chip:hover{background:var(--or-lt);border-color:var(--or-bd);color:var(--or-dk)}
+
+/* ── SHELL ── */
+#page-admin,#page-form{flex-direction:column;width:100%;max-width:1300px;margin:0 auto;padding:28px 20px 40px;min-height:100vh}
+.app-card{background:var(--surface);border-radius:18px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12);flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.tb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FF6B35,#E07820);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.tb-title{font-size:18px;font-weight:600;color:var(--text);flex:1;letter-spacing:-0.02em}
 .tb-right{display:flex;align-items:center;gap:10px}
-.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667EEA,#764BA2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
-.avatar-sm{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#667EEA,#764BA2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
-.tb-user-chip{display:flex;align-items:center;gap:10px;padding:5px 14px 5px 5px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-pill);cursor:pointer}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.tb-user{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-pill);cursor:pointer}
 .u-name{font-size:13px;font-weight:600;color:var(--text)}
-.u-dept{font-size:11px;color:var(--text3);margin-top:2px}
-.bc-back{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .12s}
+.u-role{font-size:11px;color:var(--text3)}
+.btn-logout{font-size:12px;padding:6px 14px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:var(--font)}
+.btn-logout:hover{background:var(--red-lt);color:var(--red);border-color:var(--red-bd)}
+.bc-back{display:flex;align-items:center;gap:5px;padding:6px 12px 6px 8px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500}
 .bc-back:hover{background:var(--or-lt);color:var(--or-dk);border-color:var(--or-bd)}
 
-/* DASH */
-#page-dash .content{display:grid;grid-template-columns:1fr 320px;flex:1}
-.dash-left{padding:20px;display:flex;flex-direction:column;gap:16px;border-right:1px solid var(--border)}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.stat-card{background:var(--surface);border-radius:var(--r);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
-.sc-label{font-size:13px;color:var(--text2)}
-.sc-val{font-size:32px;font-weight:700;color:var(--text);letter-spacing:-0.03em;line-height:1}
-.pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);width:fit-content}
-.pill-orange{background:#FFF0E0;color:#C2410C}
-.pill-blue{background:#EEF2FF;color:#3730A3}
-.pill-green{background:#ECFDF5;color:#065F46}
-.pill-purple{background:#FAF5FF;color:#6B21A8}
-.intent-strip{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px}
-.intent-icon{width:38px;height:38px;border-radius:11px;background:var(--or-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.intent-body{flex:1}
-.intent-lbl{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:2px}
-.intent-val{font-size:14px;font-weight:600;color:var(--text)}
-.intent-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);background:var(--or-lt);color:var(--or-dk);border:1px solid var(--or-bd);flex-shrink:0}
-.chat-box{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:220px}
-.chat-msgs{flex:1;padding:14px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
-.msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55}
-.msg.sys{align-self:flex-start;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-bottom-left-radius:3px}
-.msg.user{align-self:flex-end;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;border-bottom-right-radius:3px}
-.msg.ai{align-self:flex-start;background:var(--blue-lt);color:#1E40AF;border:1px solid var(--blue-bd);border-bottom-left-radius:3px}
-.chat-inp{border-top:1px solid var(--border);display:flex}
-.chat-inp input{flex:1;border:none;outline:none;padding:12px 16px;font-size:13px;color:var(--text);background:transparent;font-family:var(--font)}
-.chat-inp input::placeholder{color:var(--text3)}
-.chat-send{padding:12px 20px;background:none;border:none;border-left:1px solid var(--border);cursor:pointer;color:var(--or);font-size:13px;font-weight:600;font-family:var(--font)}
-.chat-send:hover{background:var(--or-lt)}
-.dash-right{display:flex;flex-direction:column;background:var(--surface)}
-.cat-head{padding:20px 20px 12px}
-.cat-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;letter-spacing:-0.02em}
-.cat-sub{font-size:12px;color:var(--text3)}
-.cat-search{margin:0 16px 8px;display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:9px 16px}
-.cat-search input{flex:1;border:none;outline:none;background:transparent;font-size:13px;color:var(--text);font-family:var(--font)}
-.cat-list{flex:1;overflow-y:auto;padding:4px 0 12px}
-.cat-group-hd{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:background .12s}
-.cat-group-hd:hover{background:var(--surface2)}
-.cg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.cg-name{font-size:13px;font-weight:700;color:var(--text);flex:1}
-.cg-cnt{font-size:11px;padding:1px 8px;border-radius:var(--r-pill);background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
-.cg-arr{color:var(--text3);font-size:12px;transition:transform .15s}
-.cat-group-hd.open .cg-arr{transform:rotate(90deg)}
-.cat-items{display:none}
-.cat-group-hd.open+.cat-items{display:block}
-.cat-item{display:flex;align-items:center;gap:12px;padding:10px 20px 10px 30px;cursor:pointer;transition:background .12s}
-.cat-item:hover{background:var(--surface2)}
-.cat-item.selected{background:var(--or-lt)}
-.ci-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
-.ci-text{flex:1}
-.ci-name{font-size:13px;font-weight:500;color:var(--text)}
-.cat-item.selected .ci-name{color:var(--or-dk);font-weight:700}
-.ci-sub{font-size:11px;color:var(--text3);margin-top:1px}
-.ci-arr{color:var(--border)}
-.cat-item.selected .ci-arr{color:var(--or)}
-.proceed-wrap{padding:14px 16px;border-top:1px solid var(--border)}
-.proceed-btn{width:100%;padding:12px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(224,120,32,0.35);transition:all .15s}
-.proceed-btn:hover{opacity:.92;transform:translateY(-1px)}
-.proceed-btn:disabled{background:var(--surface2);color:var(--text3);box-shadow:none;cursor:default;transform:none}
-.ldots span{animation:blink 1.2s ease-in-out infinite}
-.ldots span:nth-child(2){animation-delay:.2s}
-.ldots span:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
-
-/* FORM */
-#page-form .wf-banner{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.wf-icon{width:34px;height:34px;border-radius:10px;background:var(--or-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.wf-meta-wrap{flex:1}
-.wf-type-text{font-size:14px;font-weight:700;color:var(--text)}
-.wf-meta-row{display:flex;align-items:center;gap:8px;margin-top:2px}
-.wf-no-text{font-size:11px;color:var(--text3);font-family:var(--mono)}
-.wf-dot{width:3px;height:3px;border-radius:50%;background:var(--text3);opacity:.4}
-.wf-init-pill{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 5px;border-radius:var(--r-pill);background:var(--or-lt);border:1px solid var(--or-bd)}
-.wf-init-name{font-size:12px;font-weight:600;color:var(--or-dk)}
-.wf-status-tag{font-size:11px;font-weight:600;padding:4px 12px;border-radius:var(--r-pill);background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
-#page-form .content{display:grid;grid-template-columns:1fr 300px;flex:1}
-.form-pane{padding:18px 22px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--border);overflow-y:auto}
-.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
-.card-head{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--border2)}
-.ch-bar{width:3px;height:14px;border-radius:2px;background:var(--or);flex-shrink:0}
-.ch-title{font-size:12px;font-weight:700;color:var(--text);flex:1}
-.ch-badge{font-size:10px;padding:2px 9px;border-radius:var(--r-pill);font-weight:600}
-.b-gray{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
-.b-orange{background:var(--or-lt);color:var(--or-dk);border:1px solid var(--or-bd)}
-.init-grid{display:grid;grid-template-columns:1fr 1fr;padding:6px 10px 12px}
-.init-field{padding:6px}
-.if-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
-.if-val{font-size:13px;color:var(--text);font-weight:500}
-.if-val.mono{font-family:var(--mono);font-size:12px;color:var(--or-dk)}
-.org-chips-wrap{padding:10px 12px 12px}
-.oc-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
-.org-chips{display:flex;flex-wrap:wrap;gap:6px}
-.oc{font-size:12px;padding:5px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .12s}
-.oc:hover{background:var(--or-lt);border-color:var(--or-bd);color:var(--or-dk)}
-.oc.active{background:var(--or-lt);border-color:var(--or);color:var(--or-dk);font-weight:700}
-.oc-region{font-size:10px;opacity:.6;margin-left:3px}
-.divider-line{height:1px;background:var(--border2);margin:0 12px}
-.org-detail{display:grid;grid-template-columns:1fr 1fr;padding:8px 10px 12px}
-.od-field{padding:5px 6px}
-.od-field.full{grid-column:1/-1}
-.od-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-.od-val{font-size:13px;color:var(--text);font-weight:500}
-.od-val.muted{color:var(--text3);font-weight:400}
-.od-val.wrap{white-space:normal;word-break:break-all;line-height:1.4;font-size:12px}
-.adj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
-.adj-field{display:flex;flex-direction:column;gap:4px}
-.adj-field.full{grid-column:1/-1}
-.adj-lbl{font-size:11px;color:var(--text2);font-weight:600}
-.adj-lbl .req{color:var(--red);margin-left:2px}
-.adj-input{font-size:13px;color:var(--text);padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);outline:none;font-family:var(--font);transition:all .12s;width:100%}
-.adj-input:focus{border-color:var(--or);background:var(--surface);box-shadow:0 0 0 3px rgba(224,120,32,.1)}
-.adj-input::placeholder{color:var(--text3)}
-select.adj-input{cursor:pointer}
-textarea.adj-input{resize:none;line-height:1.55}
-.form-actions{display:flex;align-items:center;gap:10px;padding:14px 0 0;justify-content:flex-end}
-.btn{padding:9px 18px;border-radius:var(--r-sm);border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:6px;transition:all .12s}
-.btn-outline{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
-.btn-outline:hover{background:var(--surface2)}
-.btn-primary{background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;box-shadow:0 4px 14px rgba(224,120,32,0.3)}
-.btn-primary:hover{opacity:.9}
-.btn-primary:disabled{background:var(--surface2);color:var(--text3);box-shadow:none;cursor:default}
-.chain-pane{background:var(--surface2);display:flex;flex-direction:column}
-.cp-head{padding:16px;border-bottom:1px solid var(--border);background:var(--surface)}
-.cp-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
-.cp-sub{font-size:11px;color:var(--text3);margin-bottom:10px}
-.cp-meta{display:flex;align-items:center;gap:8px}
-.cp-steps-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
-.cp-legend{display:flex;align-items:center;gap:6px;margin-left:auto}
-.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text3);font-weight:600}
-.leg-dot{width:7px;height:7px;border-radius:50%}
-.chain-scroll{flex:1;padding:16px;overflow-y:auto}
-.chain-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:32px 16px;color:var(--text3);font-size:12px}
-.cn{display:flex;gap:10px}
-.cn-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
-.cn-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:1.5px solid;flex-shrink:0}
-.d-r{background:var(--blue-lt);color:var(--blue);border-color:var(--blue-bd)}
-.d-c{background:var(--green-lt);color:var(--green);border-color:var(--green-bd)}
-.d-a{background:var(--or-lt);color:var(--or-dk);border-color:var(--or-bd)}
-.d-i{background:var(--purple-lt);color:var(--purple);border-color:var(--purple-bd)}
-.cn-line{width:1.5px;flex:1;min-height:18px;margin:3px 0}
-.l-r{background:var(--blue-bd)}.l-c{background:var(--green-bd)}.l-a{background:rgba(224,120,32,.3)}.l-i{background:var(--purple-bd)}
-.cn-body{flex:1;padding-bottom:14px}
-.cn:last-child .cn-body{padding-bottom:0}
-.cn-role{font-size:12px;font-weight:600;color:var(--text);line-height:1.35}
-.cn-person{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)}
-.cn-tag{display:inline-flex;font-size:10px;padding:1px 7px;border-radius:6px;font-weight:700;margin-top:4px}
-.t-r{background:var(--blue-lt);color:var(--blue)}.t-c{background:var(--green-lt);color:var(--green)}.t-a{background:var(--or-lt);color:var(--or-dk)}.t-i{background:var(--purple-lt);color:var(--purple)}
-
-/* ADMIN */
-#page-admin .content{display:flex;flex-direction:column;flex:1;overflow:hidden}
-.admin-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:0}
-.a-tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+/* ── ADMIN TABS ── */
+.admin-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;overflow-x:auto}
+.a-tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
 .a-tab:hover{color:var(--text);background:var(--surface2)}
 .a-tab.active{color:var(--or);border-bottom-color:var(--or);font-weight:600}
-.admin-body{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
-.panel-head{display:flex;align-items:center;justify-content:space-between}
+.admin-body{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:16px;background:var(--bg)}
+.panel{display:none;flex-direction:column;gap:14px}
+.panel.active{display:flex}
+.panel-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .panel-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
 .panel-title span{font-size:13px;font-weight:400;color:var(--text3)}
-.add-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.panel-actions{display:flex;gap:8px;align-items:center}
+.add-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap}
 .add-btn:hover{opacity:.9}
-.data-table{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:auto;box-shadow:var(--shadow)}
+.info-bar{background:var(--blue-lt);border:1px solid var(--blue-bd);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:#1E40AF;line-height:1.6}
+
+/* ── EXCEL TABLE ── */
+.tbl-wrap{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:auto;box-shadow:var(--shadow);max-height:calc(100vh - 280px)}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:var(--surface2);padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0}
-td{padding:9px 12px;border-bottom:1px solid var(--border2);color:var(--text);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--surface2)}
+thead{position:sticky;top:0;z-index:10}
+th{background:#F1F5F9;padding:9px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--text2);border-bottom:1.5px solid #CBD5E1;border-right:1px solid #E2E8F0;white-space:nowrap}
+th:last-child{border-right:none;position:sticky;right:0;background:#F1F5F9;box-shadow:-2px 0 4px rgba(0,0,0,0.04)}
+td{padding:8px 12px;border-bottom:1px solid var(--border2);border-right:1px solid var(--border2);vertical-align:middle;color:var(--text)}
+td:last-child{border-right:none;position:sticky;right:0;background:var(--surface);box-shadow:-2px 0 4px rgba(0,0,0,0.04)}
+tr:hover td{background:#F8FAFC}
+tr:hover td:last-child{background:#F8FAFC}
+.empty-row td{text-align:center;padding:24px;color:var(--text3);font-size:13px;border-right:none}
 .td-key{font-family:var(--mono);font-size:11px;color:var(--or-dk)}
 .td-level{font-size:11px;padding:2px 8px;border-radius:var(--r-pill);font-weight:600;white-space:nowrap}
 .lv-战略层{background:#EEF2FF;color:#3730A3}
@@ -216,314 +95,440 @@ tr:hover td{background:var(--surface2)}
 .lv-运执层{background:#FDF4FF;color:#7E22CE}
 .lv-通用层{background:#F8F9FB;color:#64748B}
 .lv-系统层{background:#F1F5F9;color:#475569}
-.raci-tag{font-size:11px;font-weight:700;padding:2px 10px;border-radius:var(--r-pill)}
+.raci-tag{font-size:11px;font-weight:700;padding:2px 10px;border-radius:var(--r-pill);white-space:nowrap}
 .raci-R{background:var(--blue-lt);color:var(--blue)}
 .raci-A{background:var(--or-lt);color:var(--or-dk)}
 .raci-C{background:var(--green-lt);color:var(--green)}
 .raci-I{background:var(--purple-lt);color:var(--purple)}
-.cond-chips{display:flex;flex-wrap:wrap;gap:4px;max-width:360px}
-.cond-chip{font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);color:var(--text2);white-space:nowrap}
-.cond-chip .ck{color:var(--or-dk);font-weight:600}
-.row-actions{display:flex;gap:6px}
-.row-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);font-family:var(--font);transition:all .12s;white-space:nowrap}
+.cond-val{font-size:11px;font-family:var(--mono);white-space:nowrap}
+.cond-any{color:var(--text3);font-style:italic}
+.cond-exact{color:var(--text)}
+.cond-not{color:var(--red);background:var(--red-lt);padding:1px 6px;border-radius:4px}
+.cond-in{color:var(--blue);background:var(--blue-lt);padding:1px 6px;border-radius:4px}
+.cond-special{color:var(--purple);background:var(--purple-lt);padding:1px 6px;border-radius:4px}
+.row-acts{display:flex;gap:5px}
+.row-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);font-family:var(--font);white-space:nowrap}
 .row-btn:hover{background:var(--or-lt);color:var(--or-dk);border-color:var(--or-bd)}
 .row-btn.del:hover{background:var(--red-lt);color:var(--red);border-color:var(--red-bd)}
-.empty-row td{text-align:center;padding:24px;color:var(--text3);font-size:13px}
 
-/* MODAL */
+/* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:18px;padding:24px;width:580px;max-width:94vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
-.modal-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:-0.02em}
+.modal{background:var(--surface);border-radius:18px;padding:24px;width:600px;max-width:94vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
 .modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
-.modal-section{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 10px}
+.modal-section{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 10px;padding-top:16px;border-top:1px solid var(--border)}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal-field{display:flex;flex-direction:column;gap:5px}
-.modal-field.full{grid-column:1/-1}
-.modal-lbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
-.modal-input{font-size:13px;color:var(--text);padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);outline:none;font-family:var(--font);transition:all .12s;width:100%}
-.modal-input:focus{border-color:var(--or);background:var(--surface);box-shadow:0 0 0 3px rgba(224,120,32,.1)}
-select.modal-input{cursor:pointer}
-.modal-hint{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
-
+.mf{display:flex;flex-direction:column;gap:5px}
+.mf.full{grid-column:1/-1}
+.mf-lbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.mf-hint{font-size:11px;color:var(--text3);line-height:1.4}
+.mi{font-size:13px;color:var(--text);padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);outline:none;font-family:var(--font);width:100%}
+.mi:focus{border-color:var(--or);background:var(--surface);box-shadow:0 0 0 3px rgba(224,120,32,.1)}
+select.mi{cursor:pointer}
 /* JSON条件编辑器 */
-.cond-editor{background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden}
-.cond-editor-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cond-editor{background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden;margin-top:4px}
+.cond-editor-head{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .cond-editor-lbl{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
-.add-cond-btn{font-size:11px;font-weight:600;color:var(--or);background:none;border:none;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px}
-.add-cond-btn:hover{color:var(--or-dk)}
-.cond-rows{padding:8px}
-.cond-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;padding:4px 0}
-.cond-row-key{font-size:12px;color:var(--text);padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);outline:none;font-family:var(--mono);width:100%}
-.cond-row-key:focus{border-color:var(--or)}
-.cond-row-val{font-size:12px;color:var(--text);padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);outline:none;font-family:var(--font);width:100%}
-.cond-row-val:focus{border-color:var(--or)}
-.cond-del{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:14px;flex-shrink:0}
-.cond-del:hover{background:var(--red-lt);color:var(--red);border-color:var(--red-bd)}
-.cond-hint{padding:8px 14px 10px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);line-height:1.5}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.add-cond-btn{font-size:12px;font-weight:600;color:var(--or);background:none;border:none;cursor:pointer;font-family:var(--font)}
+.cond-rows{padding:8px;display:flex;flex-direction:column;gap:4px}
+.cond-row{display:grid;grid-template-columns:160px 1fr 28px;gap:6px;align-items:center}
+.cr-key{font-size:12px;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);outline:none;font-family:var(--mono);width:100%}
+.cr-key:focus{border-color:var(--or)}
+.cr-val{font-size:12px;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);outline:none;font-family:var(--font);width:100%}
+.cr-val:focus{border-color:var(--or)}
+.cr-del{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:16px;line-height:1}
+.cr-del:hover{background:var(--red-lt);color:var(--red);border-color:var(--red-bd)}
+.cond-hint-box{padding:8px 14px 10px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);line-height:1.6}
+.modal-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.btn{padding:9px 18px;border-radius:var(--r-sm);border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:6px}
+.btn-outline{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{background:var(--surface2)}
+.btn-primary{background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;box-shadow:0 4px 14px rgba(224,120,32,0.3)}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{background:var(--surface2);color:var(--text3);box-shadow:none;cursor:default}
 
+/* ── FORM PAGE ── */
+#page-form .app-card{display:grid;grid-template-columns:1fr 300px;grid-template-rows:58px 1fr;grid-template-areas:"top top" "main chain"}
+#page-form .topbar{grid-area:top}
+.form-main{grid-area:main;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.chain-pane{grid-area:chain;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--border2)}
+.ch-bar{width:3px;height:14px;border-radius:2px;background:var(--or);flex-shrink:0}
+.ch-title{font-size:12px;font-weight:700;color:var(--text);flex:1}
+.ch-badge{font-size:10px;padding:2px 9px;border-radius:var(--r-pill);font-weight:600}
+.b-gray{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.b-orange{background:var(--or-lt);color:var(--or-dk);border:1px solid var(--or-bd)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;padding:10px}
+.ig{padding:6px}
+.ig-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.ig-val{font-size:13px;color:var(--text);font-weight:500}
+.ig-val.mono{font-family:var(--mono);font-size:12px;color:var(--or-dk)}
+.ig-val.muted{color:var(--text3);font-weight:400}
+/* org chips */
+.org-wrap{padding:10px 14px 14px}
+.org-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.org-chips{display:flex;flex-wrap:wrap;gap:6px}
+.oc{font-size:12px;padding:5px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .12s}
+.oc:hover{background:var(--or-lt);border-color:var(--or-bd);color:var(--or-dk)}
+.oc.active{background:var(--or-lt);border-color:var(--or);color:var(--or-dk);font-weight:700}
+.oc-region{font-size:10px;opacity:.6;margin-left:3px}
+.divider{height:1px;background:var(--border2);margin:0 14px}
+.org-detail{display:grid;grid-template-columns:1fr 1fr;padding:10px 14px 14px}
+.od{padding:5px}
+.od-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.od-val{font-size:13px;color:var(--text);font-weight:500}
+.od-val.muted{color:var(--text3);font-weight:400}
+/* extra fields */
+.extra-grid{padding:14px;display:flex;flex-direction:column;gap:12px}
+.adj-field{display:flex;flex-direction:column;gap:4px}
+.adj-lbl{font-size:12px;color:var(--text2);font-weight:600}
+.adj-lbl .req{color:var(--red);margin-left:2px}
+.adj-input{font-size:13px;color:var(--text);padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);outline:none;font-family:var(--font);width:100%}
+.adj-input:focus{border-color:var(--or);background:var(--surface);box-shadow:0 0 0 3px rgba(224,120,32,.1)}
+select.adj-input{cursor:pointer}
+textarea.adj-input{resize:none;line-height:1.55}
+/* form actions */
+.form-acts{display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:4px 0}
+/* chain */
+.cp-head{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cp-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.cp-sub{font-size:11px;color:var(--text3);margin-bottom:10px}
+.cp-meta{display:flex;align-items:center;gap:8px}
+.cp-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.cp-legend{display:flex;align-items:center;gap:6px;margin-left:auto}
+.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text3);font-weight:600}
+.leg-dot{width:7px;height:7px;border-radius:50%}
+.chain-scroll{flex:1;padding:14px;overflow-y:auto}
+.chain-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:32px 16px;color:var(--text3);font-size:12px}
+.cn{display:flex;gap:10px;margin-bottom:0}
+.cn-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+.cn-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:1.5px solid;flex-shrink:0}
+.d-R{background:var(--blue-lt);color:var(--blue);border-color:var(--blue-bd)}
+.d-A{background:var(--or-lt);color:var(--or-dk);border-color:var(--or-bd)}
+.d-C{background:var(--green-lt);color:var(--green);border-color:var(--green-bd)}
+.d-I{background:var(--purple-lt);color:var(--purple);border-color:var(--purple-bd)}
+.cn-line{width:1.5px;flex:1;min-height:16px;margin:2px 0}
+.l-R{background:var(--blue-bd)}.l-A{background:rgba(224,120,32,.3)}.l-C{background:var(--green-bd)}.l-I{background:var(--purple-bd)}
+.cn-body{flex:1;padding-bottom:12px}
+.cn:last-child .cn-body{padding-bottom:0}
+.cn-role{font-size:12px;font-weight:600;color:var(--text);line-height:1.35}
+.cn-person{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)}
+.cn-tag{display:inline-flex;font-size:10px;padding:1px 7px;border-radius:6px;font-weight:700;margin-top:4px}
+.t-R{background:var(--blue-lt);color:var(--blue)}.t-A{background:var(--or-lt);color:var(--or-dk)}.t-C{background:var(--green-lt);color:var(--green)}.t-I{background:var(--purple-lt);color:var(--purple)}
+/* DASH */
+#page-dash{flex-direction:column;width:100%;max-width:1300px;margin:0 auto;padding:28px 20px 40px;min-height:100vh}
+#page-dash .app-card{display:grid;grid-template-columns:1fr 300px;grid-template-rows:58px 1fr}
+#page-dash .topbar{grid-column:1/-1}
+.dash-left{padding:20px;display:flex;flex-direction:column;gap:16px;border-right:1px solid var(--border);background:var(--bg);overflow-y:auto}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-card{background:var(--surface);border-radius:var(--r);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.sc-lbl{font-size:13px;color:var(--text2)}
+.sc-val{font-size:32px;font-weight:700;color:var(--text);letter-spacing:-0.03em;line-height:1}
+.pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);width:fit-content}
+.pill-or{background:#FFF0E0;color:#C2410C}.pill-bl{background:#EEF2FF;color:#3730A3}.pill-gr{background:#ECFDF5;color:#065F46}.pill-pu{background:#FAF5FF;color:#6B21A8}
+.dash-right{background:var(--surface);display:flex;flex-direction:column}
+.cat-head{padding:18px 18px 10px}
+.cat-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.cat-sub{font-size:12px;color:var(--text3)}
+.cat-search{margin:0 14px 6px;display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:8px 14px}
+.cat-search input{flex:1;border:none;outline:none;background:transparent;font-size:13px;color:var(--text);font-family:var(--font)}
+.cat-list{flex:1;overflow-y:auto;padding:4px 0 12px}
+.cg-hd{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;transition:background .12s}
+.cg-hd:hover{background:var(--surface2)}
+.cg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cg-name{font-size:13px;font-weight:700;color:var(--text);flex:1}
+.cg-cnt{font-size:11px;padding:1px 8px;border-radius:var(--r-pill);background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.cg-arr{color:var(--text3);font-size:12px;transition:transform .15s}
+.cg-hd.open .cg-arr{transform:rotate(90deg)}
+.ci-list{display:none}
+.cg-hd.open+.ci-list{display:block}
+.ci{display:flex;align-items:center;gap:12px;padding:9px 18px 9px 28px;cursor:pointer;transition:background .12s}
+.ci:hover{background:var(--surface2)}
+.ci.selected{background:var(--or-lt)}
+.ci-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.ci-name{font-size:13px;font-weight:500;color:var(--text)}
+.ci.selected .ci-name{color:var(--or-dk);font-weight:700}
+.ci-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.proceed-wrap{padding:12px 14px;border-top:1px solid var(--border)}
+.proceed-btn{width:100%;padding:11px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#FF6B35,#E07820);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(224,120,32,0.3)}
+.proceed-btn:hover{opacity:.92}
+.proceed-btn:disabled{background:var(--surface2);color:var(--text3);box-shadow:none;cursor:default}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
-<script src="engine.js"></script>
 </head>
 <body>
 
-<!-- PAGE 1: DASHBOARD -->
-<div id="page-dash" class="page active">
-  <div class="shell">
-    <div class="sidebar">
-      <div class="sb-logo" onclick="goAdmin()">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+<!-- ══════════════════════════════════════
+     PAGE 1: LOGIN
+══════════════════════════════════════ -->
+<div id="page-login" class="page active">
+  <div class="login-card">
+    <div>
+      <div class="login-logo">
+        <div class="login-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="login-title">领益智造 HR</div>
+          <div class="login-sub">组织架构审批系统</div>
+        </div>
       </div>
-      <div class="sb-icon active"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></div>
-      <div class="sb-div"></div>
-      <div class="sb-icon" title="管理后台" onclick="goAdmin()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 104.93 19.07"/></svg></div>
     </div>
-    <div class="main">
-      <div class="topbar">
-        <div class="tb-title">发起审批</div>
-        <div class="tb-right">
-          <div class="tb-user-chip"><div class="avatar">杨</div><div><div class="u-name">杨少莹</div><div class="u-dept">人力资源部 · HR</div></div></div>
-        </div>
+    <div class="login-fields">
+      <div class="login-field">
+        <div class="login-lbl">工号 / 账号</div>
+        <input class="login-input" id="l-user" placeholder="请输入工号" value="admin" />
       </div>
-      <div class="content">
-        <div class="dash-left">
-          <div class="stat-grid">
-            <div class="stat-card"><div class="sc-label">待处理</div><div class="sc-val">3</div><div class="pill pill-orange">需要关注</div></div>
-            <div class="stat-card"><div class="sc-label">本月发起</div><div class="sc-val">12</div><div class="pill pill-blue">审批中</div></div>
-            <div class="stat-card"><div class="sc-label">已完成</div><div class="sc-val">47</div><div class="pill pill-green">本季度</div></div>
-            <div class="stat-card"><div class="sc-label">涉及组织</div><div class="sc-val">6</div><div class="pill pill-purple">活跃</div></div>
-          </div>
-          <div class="intent-strip" id="intent-strip" style="display:none">
-            <div class="intent-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E07820" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <div class="intent-body"><div class="intent-lbl">已选流程</div><div class="intent-val" id="intent-val">—</div></div>
-            <div class="intent-tag">已识别</div>
-          </div>
-          <div class="chat-box">
-            <div class="chat-msgs" id="msgs">
-              <div class="msg sys">你好，杨少莹！我是 HR 审批助手。请告诉我你想发起什么审批，或直接在右侧目录中选择。</div>
-            </div>
-            <div class="chat-inp">
-              <input id="chat-inp" placeholder="描述你要发起的审批…" />
-              <button class="chat-send" onclick="sendChat()">发送</button>
-            </div>
-          </div>
-        </div>
-        <div class="dash-right">
-          <div class="cat-head"><div class="cat-title">流程目录</div><div class="cat-sub">选择要发起的审批类型</div></div>
-          <div class="cat-search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input placeholder="搜索流程…" oninput="filterCat(this.value)" />
-          </div>
-          <div class="cat-list" id="cat-list"></div>
-          <div class="proceed-wrap">
-            <button class="proceed-btn" id="proceed-btn" disabled onclick="goToForm()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              选择流程后继续
-            </button>
-          </div>
-        </div>
+      <div class="login-field">
+        <div class="login-lbl">密码</div>
+        <input class="login-input" type="password" id="l-pass" placeholder="请输入密码" value="123456" />
+      </div>
+    </div>
+    <div class="login-err" id="l-err">账号或密码错误</div>
+    <button class="login-btn" onclick="doLogin()">登 录</button>
+    <div>
+      <div class="login-hint">演示账号（点击快速填入）</div>
+      <div class="login-roles">
+        <div class="role-chip" onclick="fillLogin('admin','123456')">管理员 admin</div>
+        <div class="role-chip" onclick="fillLogin('HR0042','123456')">杨少莹 HR</div>
+        <div class="role-chip" onclick="fillLogin('Ivan','123456')">Ivan HR</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PAGE 2: FORM -->
-<div id="page-form" class="page">
-  <div class="shell">
-    <div class="sidebar">
-      <div class="sb-logo" onclick="showPage('page-dash')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-      <div class="sb-icon" onclick="showPage('page-dash')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg></div>
-      <div class="sb-icon active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10h8M8 14h5"/></svg></div>
-    </div>
-    <div class="main">
-      <div class="wf-banner">
-        <button class="bc-back" onclick="showPage('page-dash')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> 返回</button>
-        <div class="wf-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07820" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10h8M8 14h5"/></svg></div>
-        <div class="wf-meta-wrap">
-          <div class="wf-type-text" id="wf-type-display">组织架构调整</div>
-          <div class="wf-meta-row"><span class="wf-no-text" id="wf-no-display">WF-ORG-—</span><div class="wf-dot"></div><span style="font-size:11px;color:var(--text3)">人事类</span></div>
-        </div>
-        <div class="wf-init-pill"><div class="avatar-sm">杨</div><div class="wf-init-name">杨少莹</div></div>
-        <div class="wf-status-tag" id="wf-status">草稿</div>
+<!-- ══════════════════════════════════════
+     PAGE 2: DASHBOARD
+══════════════════════════════════════ -->
+<div id="page-dash" class="page">
+  <div class="app-card">
+    <div class="topbar">
+      <div class="tb-logo" onclick="goAdmin()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
       </div>
-      <div class="content">
-        <div class="form-pane">
-          <div class="card">
-            <div class="card-head"><div class="ch-bar"></div><div class="ch-title">发起人信息</div><div class="ch-badge b-gray">自动填充</div></div>
-            <div class="init-grid">
-              <div class="init-field"><div class="if-lbl">姓名</div><div class="if-val">杨少莹</div></div>
-              <div class="init-field"><div class="if-lbl">工号</div><div class="if-val mono" id="f-wfno">—</div></div>
-              <div class="init-field"><div class="if-lbl">部门</div><div class="if-val">人力资源部</div></div>
-              <div class="init-field"><div class="if-lbl">发起日期</div><div class="if-val" id="f-date">—</div></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div class="ch-bar"></div><div class="ch-title">目标组织</div><div class="ch-badge b-orange" id="org-badge">未选择</div></div>
-            <div class="org-chips-wrap">
-              <div class="oc-label">选择目标组织</div>
-              <div class="org-chips" id="org-chips"></div>
-            </div>
-            <div class="divider-line"></div>
-            <div class="org-detail">
-              <div class="od-field"><div class="od-lbl">组织类型</div><div class="od-val muted" id="f-type">—</div></div>
-              <div class="od-field"><div class="od-lbl">所属区域</div><div class="od-val muted" id="f-region">—</div></div>
-              <div class="od-field"><div class="od-lbl">组织层级</div><div class="od-val muted" id="f-grade">—</div></div>
-              <div class="od-field full"><div class="od-lbl">组织路径</div><div class="od-val muted wrap" id="f-path">—</div></div>
-            </div>
-          </div>
-          <!-- 流程额外条件（发起人填写） -->
-          <div class="card" id="extra-fields-card" style="display:none">
-            <div class="card-head"><div class="ch-bar"></div><div class="ch-title">补充条件</div><div class="ch-badge b-orange">请填写</div></div>
-            <div class="adj-grid" id="extra-fields-body" style="padding:12px;display:flex;flex-direction:column;gap:12px"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-head"><div class="ch-bar"></div><div class="ch-title">调整内容</div><div class="ch-badge b-orange">必填</div></div>
-            <div class="adj-grid">
-              <div class="adj-field"><div class="adj-lbl">调整类型<span class="req">*</span></div>
-                <select class="adj-input" id="adj-type" onchange="checkForm()">
-                  <option value="">请选择</option><option>新设部门</option><option>部门合并</option><option>部门撤销</option><option>部门更名</option><option>汇报线变更</option><option>职能划转</option>
-                </select>
-              </div>
-              <div class="adj-field"><div class="adj-lbl">计划生效日期<span class="req">*</span></div><input type="date" class="adj-input" id="adj-date" onchange="checkForm()" /></div>
-              <div class="adj-field full"><div class="adj-lbl">调整原因<span class="req">*</span></div><textarea class="adj-input" id="adj-reason" rows="3" placeholder="说明调整的业务背景与必要性…" oninput="checkForm()"></textarea></div>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button class="btn btn-outline" onclick="showPage('page-dash')">← 返回</button>
-            <button class="btn btn-outline">存为草稿</button>
-            <button class="btn btn-primary" id="submit-btn" disabled onclick="doSubmit()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>提交审批
-            </button>
-          </div>
+      <div class="tb-title">发起审批</div>
+      <div class="tb-right">
+        <div class="tb-user">
+          <div class="avatar" id="dash-avatar" style="background:linear-gradient(135deg,#667EEA,#764BA2)"></div>
+          <div><div class="u-name" id="dash-uname"></div><div class="u-role" id="dash-urole"></div></div>
         </div>
-        <div class="chain-pane">
-          <div class="cp-head">
-            <div class="cp-title">审批链</div><div class="cp-sub">根据目标组织自动匹配</div>
-            <div class="cp-meta">
-              <span class="cp-steps-tag" id="cp-steps">选择组织后生成</span>
-              <div class="cp-legend">
-                <div class="leg"><div class="leg-dot" style="background:#2563EB"></div>R</div>
-                <div class="leg"><div class="leg-dot" style="background:#16A34A"></div>C</div>
-                <div class="leg"><div class="leg-dot" style="background:#E07820"></div>A</div>
-                <div class="leg"><div class="leg-dot" style="background:#7C3AED"></div>I</div>
-              </div>
-            </div>
-          </div>
-          <div class="chain-scroll" id="chain-list">
-            <div class="chain-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M9 9h.01M15 9h.01"/><path d="M9 15s1 1 3 1 3-1 3-1"/></svg><span>请先选择目标组织</span></div>
-          </div>
-        </div>
+        <button class="btn-logout" onclick="doLogout()">退出</button>
+      </div>
+    </div>
+    <div class="dash-left">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="sc-lbl">待处理</div><div class="sc-val">3</div><div class="pill pill-or">需要关注</div></div>
+        <div class="stat-card"><div class="sc-lbl">本月发起</div><div class="sc-val">12</div><div class="pill pill-bl">审批中</div></div>
+        <div class="stat-card"><div class="sc-lbl">已完成</div><div class="sc-val">47</div><div class="pill pill-gr">本季度</div></div>
+        <div class="stat-card"><div class="sc-lbl">涉及组织</div><div class="sc-val">6</div><div class="pill pill-pu">活跃</div></div>
+      </div>
+    </div>
+    <div class="dash-right">
+      <div class="cat-head"><div class="cat-title">流程目录</div><div class="cat-sub">选择要发起的审批类型</div></div>
+      <div class="cat-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input placeholder="搜索流程…" oninput="filterCat(this.value)" />
+      </div>
+      <div class="cat-list" id="cat-list"></div>
+      <div class="proceed-wrap">
+        <button class="proceed-btn" id="proceed-btn" disabled onclick="goToForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          选择流程后继续
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PAGE 3: ADMIN -->
+<!-- ══════════════════════════════════════
+     PAGE 3: ADMIN
+══════════════════════════════════════ -->
 <div id="page-admin" class="page">
-  <div class="shell">
-    <div class="sidebar">
-      <div class="sb-logo" onclick="showPage('page-dash')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-      <div class="sb-icon" onclick="showPage('page-dash')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg></div>
-      <div class="sb-icon active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 104.93 19.07"/></svg></div>
-    </div>
-    <div class="main">
-      <div class="topbar">
-        <button class="bc-back" onclick="showPage('page-dash')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> 返回首页</button>
-        <div class="tb-title" style="margin-left:8px">管理后台</div>
-        <div class="tb-right"><div class="tb-user-chip"><div class="avatar" style="background:linear-gradient(135deg,#1e3a5f,#2563EB)">管</div><div><div class="u-name">管理员</div><div class="u-dept">系统管理</div></div></div></div>
+  <div class="app-card">
+    <div class="topbar" style="grid-column:1/-1">
+      <div class="tb-logo" onclick="showPage('page-dash')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="1.8"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
       </div>
-      <div class="content">
-        <div class="admin-tabs">
-          <div class="a-tab active" onclick="switchTab('roles',this)">角色库</div>
-          <div class="a-tab" onclick="switchTab('rules',this)">审批规则</div>
-          <div class="a-tab" onclick="switchTab('orgs',this)">组织管理</div>
-          <div class="a-tab" onclick="switchTab('flow_fields',this)">流程字段配置</div>
+      <button class="bc-back" onclick="showPage('page-dash')">← 返回首页</button>
+      <div class="tb-title">管理后台</div>
+      <div class="tb-right"><button class="btn-logout" onclick="doLogout()">退出</button></div>
+    </div>
+    <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div class="admin-tabs">
+        <div class="a-tab active" onclick="switchTab('roles',this)">角色库</div>
+        <div class="a-tab" onclick="switchTab('rules',this)">审批规则</div>
+        <div class="a-tab" onclick="switchTab('orgs',this)">组织管理</div>
+        <div class="a-tab" onclick="switchTab('flow_fields',this)">流程字段配置</div>
+      </div>
+      <div class="admin-body">
+
+        <!-- 角色库 -->
+        <div class="panel active" id="panel-roles">
+          <div class="panel-head">
+            <div class="panel-title">角色库 <span id="roles-cnt"></span></div>
+            <button class="add-btn" onclick="openModal('roles')">＋ 新增角色</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>水位层</th><th>角色编码</th><th>中文名称</th><th>英文名称</th><th>组织类型</th><th>族群</th><th>负责人</th><th>工号</th><th>操作</th></tr></thead>
+              <tbody id="roles-body"><tr class="empty-row"><td colspan="9">加载中…</td></tr></tbody>
+            </table>
+          </div>
         </div>
-        <div class="admin-body">
 
-          <!-- 角色库面板 -->
-          <div id="panel-roles" style="display:flex;flex-direction:column;gap:16px">
-            <div class="panel-head">
-              <div class="panel-title">角色库 <span id="roles-count"></span></div>
-              <button class="add-btn" onclick="openRoleModal()">＋ 新增角色</button>
-            </div>
-            <div class="data-table">
-              <table>
-                <thead><tr><th>水位层</th><th>角色编码</th><th>中文名称</th><th>英文名称</th><th>组织类型</th><th>族群</th><th>负责人</th><th>工号</th><th>操作</th></tr></thead>
-                <tbody id="roles-body"><tr class="empty-row"><td colspan="9">加载中…</td></tr></tbody>
-              </table>
+        <!-- 审批规则（Excel样式） -->
+        <div class="panel" id="panel-rules">
+          <div class="panel-head">
+            <div class="panel-title">审批规则 <span id="rules-cnt"></span></div>
+            <div class="panel-actions">
+              <select id="raci-filter" class="mi" style="width:140px;padding:7px 10px" onchange="loadRulesTable()">
+                <option value="">全部 RACI</option>
+                <option value="R">R · 发起</option>
+                <option value="A">A · 批准</option>
+                <option value="C">C · 咨询</option>
+                <option value="I">I · 知会</option>
+              </select>
+              <button class="add-btn" onclick="openModal('rules')">＋ 新增规则</button>
             </div>
           </div>
-
-          <!-- 审批规则面板 -->
-          <div id="panel-rules" style="display:none;flex-direction:column;gap:16px">
-            <div class="panel-head">
-              <div class="panel-title">审批规则 <span id="rules-count"></span></div>
-              <div style="display:flex;gap:8px;align-items:center">
-                <select id="raci-filter" class="modal-input" style="width:140px;padding:7px 10px" onchange="applyRaciFilter()">
-                  <option value="">全部 RACI</option>
-                  <option value="R">R · 发起</option>
-                  <option value="A">A · 批准</option>
-                  <option value="C">C · 咨询</option>
-                  <option value="I">I · 知会</option>
-                </select>
-                <button class="add-btn" onclick="openRuleModal()">＋ 新增规则</button>
-              </div>
-            </div>
-            <div class="data-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>RACI</th>
-                    <th>规则ID</th>
-                    <th>条件（JSON）</th>
-                    <th>角色编码</th>
-                    <th>角色名称</th>
-                    <th>顺序</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody id="rules-body"><tr class="empty-row"><td colspan="7">加载中…</td></tr></tbody>
-              </table>
-            </div>
+          <div class="info-bar">每行是一条规则。所有条件列都满足（Any/-/空 = 通配）才会带出该角色。R/A 取唯一最高优先级，C/I 收集所有满足的。</div>
+          <div class="tbl-wrap" id="rules-tbl-wrap">
+            <table id="rules-table">
+              <thead id="rules-thead"></thead>
+              <tbody id="rules-body"><tr class="empty-row"><td colspan="10">加载中…</td></tr></tbody>
+            </table>
           </div>
-
-          <!-- 组织管理 -->
-          <div id="panel-orgs" style="display:none;flex-direction:column;gap:16px">
-            <div class="panel-head">
-              <div class="panel-title">组织管理 <span id="orgs-count"></span></div>
-              <button class="add-btn" onclick="openOrgModal()">＋ 新增组织</button>
-            </div>
-            <div class="data-table">
-              <table>
-                <thead><tr><th>部门全称（path）</th><th>组织类型</th><th>组织层级</th><th>所属区域</th><th>操作</th></tr></thead>
-                <tbody id="orgs-body"><tr class="empty-row"><td colspan="5">加载中…</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 流程字段配置 -->
-          <div id="panel-flow_fields" style="display:none;flex-direction:column;gap:16px">
-            <div class="panel-head">
-              <div class="panel-title">流程字段配置 <span id="flow_fields-count"></span></div>
-              <button class="add-btn" onclick="openFlowFieldModal()">＋ 新增字段</button>
-            </div>
-            <div style="background:var(--blue-lt);border:1px solid var(--blue-bd);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:#1E40AF;line-height:1.6;margin-bottom:4px">
-              配置每个流程需要发起人额外填写的条件。<strong>field_key</strong> 必须和审批规则 conditions 里的 key 完全一致。config 是 JSON 格式，支持 type: select / number / text。
-            </div>
-            <div class="data-table">
-              <table>
-                <thead><tr><th>流程key</th><th>条件key</th><th>显示问题</th><th>类型</th><th>选项/配置</th><th>顺序</th><th>操作</th></tr></thead>
-                <tbody id="flow_fields-body"><tr class="empty-row"><td colspan="7">加载中…</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-
         </div>
+
+        <!-- 组织管理 -->
+        <div class="panel" id="panel-orgs">
+          <div class="panel-head">
+            <div class="panel-title">组织管理 <span id="orgs-cnt"></span></div>
+            <button class="add-btn" onclick="openModal('orgs')">＋ 新增组织</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>部门全称</th><th>组织类型</th><th>组织层级</th><th>所属区域</th><th>操作</th></tr></thead>
+              <tbody id="orgs-body"><tr class="empty-row"><td colspan="5">加载中…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 流程字段配置 -->
+        <div class="panel" id="panel-flow_fields">
+          <div class="panel-head">
+            <div class="panel-title">流程字段配置 <span id="ff-cnt"></span></div>
+            <button class="add-btn" onclick="openModal('flow_fields')">＋ 新增字段</button>
+          </div>
+          <div class="info-bar">配置每个流程需要发起人额外填写的条件。field_key 必须和审批规则 conditions 里的 key 完全一致。</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>流程</th><th>条件key</th><th>显示问题</th><th>类型</th><th>选项</th><th>顺序</th><th>操作</th></tr></thead>
+              <tbody id="ff-body"><tr class="empty-row"><td colspan="7">加载中…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 4: FORM
+══════════════════════════════════════ -->
+<div id="page-form" class="page">
+  <div class="app-card">
+    <div class="topbar">
+      <button class="bc-back" onclick="showPage('page-dash')">← 返回</button>
+      <div class="tb-title" id="form-title">发起审批</div>
+      <div class="tb-right">
+        <div class="tb-user">
+          <div class="avatar" id="form-avatar" style="background:linear-gradient(135deg,#667EEA,#764BA2)"></div>
+          <div><div class="u-name" id="form-uname"></div></div>
+        </div>
+        <div id="wf-status-tag" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px;background:var(--surface2);color:var(--text3);border:1px solid var(--border)">草稿</div>
+      </div>
+    </div>
+    <div class="form-main">
+      <!-- 发起人信息 -->
+      <div class="card">
+        <div class="card-head"><div class="ch-bar"></div><div class="ch-title">发起人信息</div><div class="ch-badge b-gray">自动填充</div></div>
+        <div class="info-grid">
+          <div class="ig"><div class="ig-lbl">姓名</div><div class="ig-val" id="f-name">—</div></div>
+          <div class="ig"><div class="ig-lbl">工号</div><div class="ig-val mono" id="f-wfno">—</div></div>
+          <div class="ig"><div class="ig-lbl">部门</div><div class="ig-val">人力资源部</div></div>
+          <div class="ig"><div class="ig-lbl">发起日期</div><div class="ig-val" id="f-date">—</div></div>
+        </div>
+      </div>
+      <!-- 目标组织 -->
+      <div class="card">
+        <div class="card-head"><div class="ch-bar"></div><div class="ch-title">目标组织</div><div class="ch-badge b-orange" id="org-badge">未选择</div></div>
+        <div class="org-wrap">
+          <div class="org-label">选择目标组织</div>
+          <div class="org-chips" id="org-chips"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="org-detail">
+          <div class="od"><div class="od-lbl">组织类型</div><div class="od-val muted" id="f-type">—</div></div>
+          <div class="od"><div class="od-lbl">所属区域</div><div class="od-val muted" id="f-region">—</div></div>
+          <div class="od"><div class="od-lbl">组织层级</div><div class="od-val muted" id="f-grade">—</div></div>
+          <div class="od" style="grid-column:1/-1"><div class="od-lbl">组织路径</div><div class="od-val muted" id="f-path" style="font-size:12px;word-break:break-all;line-height:1.5">—</div></div>
+        </div>
+      </div>
+      <!-- 补充条件 -->
+      <div class="card" id="extra-card" style="display:none">
+        <div class="card-head"><div class="ch-bar"></div><div class="ch-title">补充条件</div><div class="ch-badge b-orange">请填写</div></div>
+        <div class="extra-grid" id="extra-body"></div>
+      </div>
+      <!-- 调整内容 -->
+      <div class="card">
+        <div class="card-head"><div class="ch-bar"></div><div class="ch-title">调整内容</div><div class="ch-badge b-orange">必填</div></div>
+        <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="adj-field">
+            <div class="adj-lbl">调整类型<span class="req">*</span></div>
+            <select class="adj-input" id="adj-type" onchange="checkForm()">
+              <option value="">请选择</option><option>新设部门</option><option>部门合并</option><option>部门撤销</option><option>部门更名</option><option>汇报线变更</option><option>职能划转</option>
+            </select>
+          </div>
+          <div class="adj-field">
+            <div class="adj-lbl">计划生效日期<span class="req">*</span></div>
+            <input type="date" class="adj-input" id="adj-date" onchange="checkForm()" />
+          </div>
+          <div class="adj-field" style="grid-column:1/-1">
+            <div class="adj-lbl">调整原因<span class="req">*</span></div>
+            <textarea class="adj-input" id="adj-reason" rows="3" placeholder="说明调整的业务背景与必要性…" oninput="checkForm()"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="form-acts">
+        <button class="btn btn-outline" onclick="showPage('page-dash')">← 返回</button>
+        <button class="btn btn-outline">存为草稿</button>
+        <button class="btn btn-primary" id="submit-btn" disabled onclick="doSubmit()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>提交审批
+        </button>
+      </div>
+    </div>
+    <!-- 审批链 -->
+    <div class="chain-pane">
+      <div class="cp-head">
+        <div class="cp-title">审批链</div>
+        <div class="cp-sub">根据目标组织自动匹配</div>
+        <div class="cp-meta">
+          <span class="cp-tag" id="cp-steps">选择组织后生成</span>
+          <div class="cp-legend">
+            <div class="leg"><div class="leg-dot" style="background:#2563EB"></div>R</div>
+            <div class="leg"><div class="leg-dot" style="background:#E07820"></div>A</div>
+            <div class="leg"><div class="leg-dot" style="background:#16A34A"></div>C</div>
+            <div class="leg"><div class="leg-dot" style="background:#7C3AED"></div>I</div>
+          </div>
+        </div>
+      </div>
+      <div class="chain-scroll" id="chain-list">
+        <div class="chain-empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M9 9h.01M15 9h.01"/><path d="M9 15s1 1 3 1 3-1 3-1"/></svg><span>请先选择目标组织</span></div>
       </div>
     </div>
   </div>
@@ -531,11 +536,11 @@ select.modal-input{cursor:pointer}
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
-  <div class="modal" id="modal-box">
+  <div class="modal">
     <div class="modal-title" id="modal-title"></div>
     <div class="modal-sub" id="modal-sub"></div>
-    <div id="modal-form"></div>
-    <div class="modal-actions">
+    <div id="modal-body"></div>
+    <div class="modal-acts">
       <button class="btn btn-outline" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="saveModal()">保存</button>
     </div>
@@ -544,19 +549,15 @@ select.modal-input{cursor:pointer}
 
 <script>
 // ══════════════════════════════════════════
-// SUPABASE CONFIG
+// SUPABASE
 // ══════════════════════════════════════════
 const SB_URL = 'https://hpidfemxdashrxqhwwhg.supabase.co';
 const SB_KEY = 'sb_publishable_tN6QwpZ21CqyZXevvJ8zBw_mq26MmVL';
 
 function sbFetch(path, opts={}) {
-  return fetch(SB_URL + '/rest/v1/' + path, {
+  return fetch(SB_URL+'/rest/v1/'+path, {
     ...opts,
-    headers: {
-      'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
-      'Content-Type': 'application/json', 'Prefer': opts.prefer || 'return=representation',
-      ...(opts.headers||{})
-    }
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':opts.prefer||'return=representation',...(opts.headers||{})}
   });
 }
 const sbGet  = (t,p='') => sbFetch(t+'?order=id'+(p?'&'+p:'')).then(r=>r.json());
@@ -565,20 +566,56 @@ const sbPatch= (t,id,b) => sbFetch(t+'?id=eq.'+id,{method:'PATCH',body:JSON.stri
 const sbDel  = (t,id)   => sbFetch(t+'?id=eq.'+id,{method:'DELETE',prefer:'return=minimal'});
 
 // ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+const USERS = {
+  'admin':  {name:'管理员',role:'系统管理员',color:'linear-gradient(135deg,#1e3a5f,#2563EB)',isAdmin:true},
+  'HR0042': {name:'杨少莹',role:'人力资源部 · HR',color:'linear-gradient(135deg,#667EEA,#764BA2)',isAdmin:false},
+  'Ivan':   {name:'Ivan',role:'集团人力资源中心负责人',color:'linear-gradient(135deg,#16A34A,#15803D)',isAdmin:false},
+};
+let currentUser = null;
+
+function fillLogin(u,p){document.getElementById('l-user').value=u;document.getElementById('l-pass').value=p;}
+
+function doLogin() {
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value.trim();
+  const err=document.getElementById('l-err');
+  const user=USERS[u];
+  if(!user||p!=='123456'){err.style.display='block';return;}
+  err.style.display='none';
+  currentUser=u;
+  updateUserUI();
+  if(user.isAdmin) goAdmin();
+  else { showPage('page-dash'); }
+}
+
+function doLogout(){currentUser=null;showPage('page-login');}
+
+function updateUserUI(){
+  if(!currentUser)return;
+  const u=USERS[currentUser];
+  const initials=u.name.charAt(0);
+  ['dash','form'].forEach(p=>{
+    const av=document.getElementById(p+'-avatar');
+    const nm=document.getElementById(p+'-uname');
+    if(av){av.textContent=initials;av.style.background=u.color;}
+    if(nm) nm.textContent=u.name;
+  });
+  const dr=document.getElementById('dash-urole');
+  if(dr) dr.textContent=u.role;
+}
+
+// ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
-let ROLES_MAP = {};
-let ALL_RULES = [];
-let FILTERED_RULES = [];
-let FLOW_FIELDS_MAP = {}; // { flow_key: [field配置...] }
-let extraContext = {};    // 发起人填写的额外条件
-let selectedKey = null, openGroups = new Set(['人事类']), wfno = '', selectedOrg = null;
-let modalMode = null, editingId = null;
-let currentTab = 'roles';
+let ROLES_MAP={}, ORGS=[], FLOW_FIELDS_MAP={};
+let ALL_RULES=[];
+let selectedKey=null, openGroups=new Set(['人事类']), wfno='', selectedOrg=null;
+let extraCtx={};
+let modalMode=null, editingId=null, currentTab='roles';
 
-let STATIC_ORGS = [];
-
-const CATALOG = [
+const CATALOG=[
   {name:'人事类',color:'#FF6B35',bg:'#FFF7ED',items:[
     {icon:'🏢',name:'组织架构调整',sub:'部门新设/合并/撤销/更名',key:'org_adjust'},
     {icon:'👤',name:'岗位变更管理',sub:'岗位新增/撤销/调整',key:'pos_change'},
@@ -593,259 +630,186 @@ const CATALOG = [
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-async function init() {
-  await Promise.all([loadRoles(), loadOrgs(), loadFlowFields()]);
+async function init(){
+  await Promise.all([loadRoles(),loadOrgs(),loadFlowFields()]);
   renderCatalog();
+}
+
+async function loadRoles(){
+  const d=await sbGet('roles','limit=200');
+  ROLES_MAP={};
+  if(Array.isArray(d)) d.forEach(r=>ROLES_MAP[r.key]=r);
+}
+async function loadOrgs(){
+  const d=await sbGet('orgs','order=id&limit=200');
+  ORGS=Array.isArray(d)?d:[];
   renderOrgChips();
 }
-
-async function loadFlowFields() {
-  const data = await sbGet('flow_fields', 'order=flow_key,sort_order&limit=200');
-  FLOW_FIELDS_MAP = {};
-  if (Array.isArray(data)) {
-    data.forEach(f => {
-      if (!FLOW_FIELDS_MAP[f.flow_key]) FLOW_FIELDS_MAP[f.flow_key] = [];
-      FLOW_FIELDS_MAP[f.flow_key].push(f);
-    });
-  }
+async function loadFlowFields(){
+  const d=await sbGet('flow_fields','order=flow_key,sort_order&limit=200');
+  FLOW_FIELDS_MAP={};
+  if(Array.isArray(d)) d.forEach(f=>{
+    if(!FLOW_FIELDS_MAP[f.flow_key]) FLOW_FIELDS_MAP[f.flow_key]=[];
+    FLOW_FIELDS_MAP[f.flow_key].push(f);
+  });
 }
 
-async function loadOrgs() {
-  const data = await sbGet('orgs', 'order=id&limit=200');
-  if (Array.isArray(data) && data.length) {
-    STATIC_ORGS = data.map(r => ({
-      type: r.type,
-      grade: r.grade,
-      region: r.region,
-      path: r.path
-    }));
-  }
+// ══════════════════════════════════════════
+// PAGE NAV
+// ══════════════════════════════════════════
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
 }
-
-async function loadRoles() {
-  const data = await sbGet('roles','limit=200');
-  ROLES_MAP = {};
-  if (Array.isArray(data)) data.forEach(r => ROLES_MAP[r.key] = r);
+function goAdmin(){showPage('page-admin');loadAdminData();}
+function goToForm(){
+  if(!selectedKey)return;
+  wfno='WF-ORG-'+Date.now().toString().slice(-8);
+  const u=USERS[currentUser]||{name:'—'};
+  document.getElementById('f-name').textContent=u.name;
+  document.getElementById('f-wfno').textContent=wfno;
+  document.getElementById('f-date').textContent=new Date().toISOString().slice(0,10);
+  document.getElementById('form-title').textContent=CATALOG.flatMap(g=>g.items).find(i=>i.key===selectedKey)?.name||'发起审批';
+  showPage('page-form');
 }
 
 // ══════════════════════════════════════════
 // CATALOG
 // ══════════════════════════════════════════
-function renderCatalog(filter='') {
-  const list = document.getElementById('cat-list');
-  list.innerHTML = '';
-  CATALOG.forEach(group => {
-    const items = filter ? group.items.filter(i=>i.name.includes(filter)||i.sub.includes(filter)) : group.items;
-    if (!items.length) return;
-    const isOpen = openGroups.has(group.name)||!!filter;
-    const g = document.createElement('div');
-    g.innerHTML = `
-      <div class="cat-group-hd ${isOpen?'open':''}" onclick="toggleGroup('${group.name}',this)">
+function renderCatalog(filter=''){
+  const list=document.getElementById('cat-list');
+  list.innerHTML='';
+  CATALOG.forEach(group=>{
+    const items=filter?group.items.filter(i=>i.name.includes(filter)||i.sub.includes(filter)):group.items;
+    if(!items.length)return;
+    const isOpen=openGroups.has(group.name)||!!filter;
+    const g=document.createElement('div');
+    g.innerHTML=`
+      <div class="cg-hd ${isOpen?'open':''}" onclick="toggleGroup('${group.name}',this)">
         <div class="cg-dot" style="background:${group.color}"></div>
         <div class="cg-name">${group.name}</div><div class="cg-cnt">${items.length}</div><div class="cg-arr">›</div>
       </div>
-      <div class="cat-items" ${isOpen?'style="display:block"':''}>
+      <div class="ci-list" ${isOpen?'style="display:block"':''}>
         ${items.map(item=>`
-          <div class="cat-item ${selectedKey===item.key?'selected':''}" onclick="selectItem('${item.key}','${item.name}')">
+          <div class="ci ${selectedKey===item.key?'selected':''}" onclick="selectItem('${item.key}','${item.name}')">
             <div class="ci-icon" style="background:${group.bg}">${item.icon}</div>
-            <div class="ci-text"><div class="ci-name">${item.name}</div><div class="ci-sub">${item.sub}</div></div>
-            <div class="ci-arr">›</div>
+            <div><div class="ci-name">${item.name}</div><div class="ci-sub">${item.sub}</div></div>
           </div>`).join('')}
       </div>`;
     list.appendChild(g);
   });
 }
-function toggleGroup(name,el){if(openGroups.has(name))openGroups.delete(name);else openGroups.add(name);renderCatalog();}
+function toggleGroup(n,el){if(openGroups.has(n))openGroups.delete(n);else openGroups.add(n);renderCatalog();}
 function selectItem(key,name){
-  selectedKey=key;
-  extraContext = {}; // 重置额外条件
-  document.getElementById('proceed-btn').disabled=false;
-  document.getElementById('proceed-btn').innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg> 发起「${name}」`;
-  document.getElementById('intent-strip').style.display='flex';
-  document.getElementById('intent-val').textContent=name;
+  selectedKey=key; extraCtx={};
+  const btn=document.getElementById('proceed-btn');
+  btn.disabled=false;
+  btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg> 发起「${name}」`;
   renderCatalog();
-  addMsg(`已为你选择「${name}」，点击发起按钮进入审批单填写。`,'ai');
 }
 function filterCat(v){renderCatalog(v.trim());}
 
 // ══════════════════════════════════════════
-// CHAT
-// ══════════════════════════════════════════
-function addMsg(text,cls){const box=document.getElementById('msgs');const d=document.createElement('div');d.className='msg '+(cls||'sys');d.textContent=text;box.appendChild(d);box.scrollTop=box.scrollHeight;}
-function addLoading(){const box=document.getElementById('msgs');const d=document.createElement('div');d.className='msg ai';d.id='__ld__';d.innerHTML='<span class="ldots"><span>●</span><span>●</span><span>●</span></span>';box.appendChild(d);box.scrollTop=box.scrollHeight;}
-function rmLoading(){const e=document.getElementById('__ld__');if(e)e.remove();}
-async function sendChat(){
-  const el=document.getElementById('chat-inp');const txt=el.value.trim();if(!txt)return;
-  el.value='';addMsg(txt,'user');addLoading();
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:`你是领益智造HR审批系统助手。识别用户想发起哪种审批。可选：组织架构调整、岗位变更管理、考勤管理、系统需求管理、用户权限管理。先输出确认（≤20字），再输出JSON：{"intent":"流程名称"}，用\`\`\`json\`\`\`包裹。`,messages:[{role:'user',content:txt}]})});
-    const data=await res.json();const raw=data.content?.map(i=>i.text||'').join('')||'';
-    rmLoading();const jm=raw.match(/```json\s*([\s\S]*?)```/);
-    addMsg(raw.replace(/```json[\s\S]*?```/g,'').trim()||'已识别。','ai');
-    if(jm){let p={};try{p=JSON.parse(jm[1]);}catch(e){}
-      if(p.intent){let fk=null;CATALOG.forEach(g=>g.items.forEach(i=>{if(i.name===p.intent)fk=i.key;}));if(fk)selectItem(fk,p.intent);}}
-  }catch(e){rmLoading();addMsg('网络异常，请重试。','ai');}
-}
-document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
-
-// ══════════════════════════════════════════
-// PAGE NAV
-// ══════════════════════════════════════════
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
-function goAdmin(){showPage('page-admin');loadAdminData();}
-function goToForm(){
-  if(!selectedKey)return;
-  wfno='WF-ORG-'+Date.now().toString().slice(-8);
-  document.getElementById('f-wfno').textContent=wfno;
-  document.getElementById('wf-no-display').textContent=wfno;
-  document.getElementById('f-date').textContent=new Date().toISOString().slice(0,10);
-  showPage('page-form');
-}
-
-// ══════════════════════════════════════════
-// ORG CHIPS & CHAIN ENGINE
+// ORG CHIPS
 // ══════════════════════════════════════════
 function renderOrgChips(){
-  const wrap=document.getElementById('org-chips');wrap.innerHTML='';
-  STATIC_ORGS.forEach(org=>{
-    const el=document.createElement('div');el.className='oc';
-    const last=org.path.split(' / ').pop();
+  const wrap=document.getElementById('org-chips');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  ORGS.forEach(org=>{
+    const el=document.createElement('div');
+    el.className='oc';
+    const last=org.path.split('/').pop().trim();
     el.innerHTML=`${last}<span class="oc-region">· ${org.region}</span>`;
-    el.onclick=()=>selectOrg(org,el);wrap.appendChild(el);
+    el.onclick=()=>selectOrg(org,el);
+    wrap.appendChild(el);
   });
 }
+
 function selectOrg(org,el){
   document.querySelectorAll('.oc').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');selectedOrg=org;
-  const last=org.path.split(' / ').pop();
+  el.classList.add('active');
+  selectedOrg=org;
+  const last=org.path.split('/').pop().trim();
   document.getElementById('org-badge').textContent=last;
-  const set=(id,val)=>{const e=document.getElementById(id);e.textContent=val;e.classList.remove('muted');};
+  const set=(id,v)=>{const e=document.getElementById(id);if(e){e.textContent=v;e.classList.remove('muted');}};
   set('f-type',org.type);set('f-region',org.region);set('f-grade',org.grade);set('f-path',org.path);
+  extraCtx={};
   renderExtraFields();
-  renderChain(org);checkForm();
+  renderChain();
+  checkForm();
 }
 
-// ── 动态渲染发起人额外条件 ────────────────────
-function renderExtraFields() {
-  const card = document.getElementById('extra-fields-card');
-  const body = document.getElementById('extra-fields-body');
-  const fields = FLOW_FIELDS_MAP[selectedKey] || [];
-
-  if (!fields.length || !selectedOrg) {
-    card.style.display = 'none';
-    extraContext = {};
-    return;
-  }
-
-  card.style.display = 'block';
-  body.innerHTML = fields.map(f => {
-    const cfg = f.config || {};
-    const label = cfg.label || f.field_key;
-    const type = cfg.type || 'select';
-    const required = cfg.required ? '<span class="req">*</span>' : '';
-
-    if (type === 'select') {
-      const options = (cfg.options || []).map(o =>
-        `<option value="${o}">${o}</option>`
-      ).join('');
-      return `<div class="adj-field full">
-        <div class="adj-lbl">${label}${required}</div>
-        <select class="adj-input" data-fkey="${f.field_key}" onchange="updateExtraContext(this)">
-          <option value="">请选择</option>${options}
-        </select>
-      </div>`;
+// ══════════════════════════════════════════
+// EXTRA FIELDS（发起人补充条件）
+// ══════════════════════════════════════════
+function renderExtraFields(){
+  const card=document.getElementById('extra-card');
+  const body=document.getElementById('extra-body');
+  const fields=FLOW_FIELDS_MAP[selectedKey]||[];
+  if(!fields.length||!selectedOrg){card.style.display='none';extraCtx={};return;}
+  card.style.display='block';
+  body.innerHTML=fields.map(f=>{
+    const cfg=f.config||{};
+    const lbl=cfg.label||f.field_key;
+    const req=cfg.required?'<span class="req">*</span>':'';
+    if(cfg.type==='select'){
+      const opts=(cfg.options||[]).map(o=>`<option value="${o}">${o}</option>`).join('');
+      return `<div class="adj-field"><div class="adj-lbl">${lbl}${req}</div>
+        <select class="adj-input" data-fkey="${f.field_key}" onchange="updateExtra(this)">
+          <option value="">请选择</option>${opts}
+        </select></div>`;
     }
-    if (type === 'number') {
-      return `<div class="adj-field full">
-        <div class="adj-lbl">${label}${required}</div>
-        <input type="number" class="adj-input" data-fkey="${f.field_key}"
-          placeholder="${cfg.placeholder||''}" oninput="updateExtraContext(this)" />
-      </div>`;
+    if(cfg.type==='number'){
+      return `<div class="adj-field"><div class="adj-lbl">${lbl}${req}</div>
+        <input type="number" class="adj-input" data-fkey="${f.field_key}" placeholder="${cfg.placeholder||''}" oninput="updateExtra(this)" /></div>`;
     }
-    return `<div class="adj-field full">
-      <div class="adj-lbl">${label}${required}</div>
-      <input type="text" class="adj-input" data-fkey="${f.field_key}"
-        placeholder="${cfg.placeholder||''}" oninput="updateExtraContext(this)" />
-    </div>`;
+    return `<div class="adj-field"><div class="adj-lbl">${lbl}${req}</div>
+      <input type="text" class="adj-input" data-fkey="${f.field_key}" placeholder="${cfg.placeholder||''}" oninput="updateExtra(this)" /></div>`;
   }).join('');
-
-  extraContext = {};
 }
 
-function updateExtraContext(el) {
-  const key = el.dataset.fkey;
-  const val = el.value.trim();
-  if (val) extraContext[key] = val;
-  else delete extraContext[key];
-  // 条件变了，重新计算审批链
-  if (selectedOrg) renderChain(selectedOrg);
+function updateExtra(el){
+  const k=el.dataset.fkey; const v=el.value.trim();
+  if(v) extraCtx[k]=v; else delete extraCtx[k];
+  renderChain();
 }
 
-// ── JSON条件匹配引擎 ────────────────────────
-function matchCond(cellVal, actual) {
-  if (!cellVal || cellVal==='' ) return true;
-  const s = String(cellVal).trim();
-  if (s === 'Any') return true;
-  // 集团总部 = 对所有区域生效（总部发的规则不限区域）
-  if (s === '集团总部') return true;
-  // not ["a","b"]
-  if (/^[Nn]ot\s*\[/.test(s)) {
-    const inner = s.replace(/^[Nn]ot\s*\[/,'').replace(/\]$/,'');
-    const vals = inner.split(',').map(v=>v.trim().replace(/^["']|["']$/g,''));
-    return !vals.includes(actual);
-  }
-  // ["a","b"] 包含列表
-  if (s.startsWith('[')) {
-    const vals = s.replace(/^\[|\]$/g,'').split(',').map(v=>v.trim().replace(/^["']|["']$/g,''));
-    return vals.includes(actual);
-  }
-  // contains(field, "val")
-  if (s.includes('contains(')) {
-    const m = s.match(/contains\([^,]+,\s*["'](.+?)["']\)/);
-    if (m) return actual.includes(m[1]);
-  }
-  return s === actual;
-}
-
-// ── 审批链渲染（逻辑在 engine.js）──────────────────────────
-
-async function renderChain(org) {
+// ══════════════════════════════════════════
+// CHAIN RENDER
+// ══════════════════════════════════════════
+async function renderChain(){
+  if(!selectedOrg)return;
   document.getElementById('chain-list').innerHTML='<div class="chain-empty"><span>计算审批链中…</span></div>';
   document.getElementById('cp-steps').textContent='计算中…';
 
-  const rules = await sbGet('approval_rules','limit=500');
-  if (!Array.isArray(rules)) {
-    document.getElementById('chain-list').innerHTML='<div class="chain-empty"><span>加载失败，请刷新重试</span></div>';
-    return;
+  if(!ALL_RULES.length){
+    const d=await sbGet('approval_rules','limit=500');
+    ALL_RULES=Array.isArray(d)?d:[];
   }
 
-  // 调用 engine.js 的主函数，合并 org 固定属性 + 发起人填写的额外条件
-  const steps = computeChain(org, selectedKey, rules, extraContext);
+  const steps=computeChain(selectedOrg,selectedKey,ALL_RULES,extraCtx);
+  document.getElementById('cp-steps').textContent=`共 ${steps.length} 步`;
 
-  document.getElementById('cp-steps').textContent = `共 ${steps.length} 步`;
-
-  if (!steps.length) {
+  if(!steps.length){
     document.getElementById('chain-list').innerHTML='<div class="chain-empty"><span>该条件下暂无匹配规则</span></div>';
     return;
   }
 
-  const DOT={R:'d-r',C:'d-c',A:'d-a',I:'d-i'};
-  const LINE={R:'l-r',C:'l-c',A:'l-a',I:'l-i'};
-  const TAG={R:'t-r',C:'t-c',A:'t-a',I:'t-i'};
-  const LBL={R:'R · 发起',C:'C · 咨询',A:'A · 批准',I:'I · 知会'};
-
-  document.getElementById('chain-list').innerHTML = steps.map((s, i) => {
-    const role = ROLES_MAP[s.role_key] || {name_cn: s.role_key, person: '', emp_id: ''};
-    const isLast = i === steps.length - 1;
+  const LBL={R:'R · 发起',A:'A · 批准',C:'C · 咨询',I:'I · 知会'};
+  document.getElementById('chain-list').innerHTML=steps.map((s,i)=>{
+    const role=ROLES_MAP[s.role_key]||{name_cn:s.role_key,person:'',emp_id:''};
+    const isLast=i===steps.length-1;
     return `<div class="cn">
       <div class="cn-left">
-        <div class="cn-dot ${DOT[s.raci]}">${s.raci}</div>
-        ${!isLast ? `<div class="cn-line ${LINE[s.raci]}"></div>` : ''}
+        <div class="cn-dot d-${s.raci}">${s.raci}</div>
+        ${!isLast?`<div class="cn-line l-${s.raci}"></div>`:''}
       </div>
       <div class="cn-body">
-        <div class="cn-role">${role.name_cn || s.role_key}</div>
-        <div class="cn-person">${role.person ? role.person + (role.emp_id ? ' · ' + role.emp_id : '') : ''}</div>
-        <span class="cn-tag ${TAG[s.raci]}">${LBL[s.raci]}</span>
+        <div class="cn-role">${role.name_cn||s.role_key}</div>
+        <div class="cn-person">${role.person?role.person+(role.emp_id?' · '+role.emp_id:''):''}</div>
+        <span class="cn-tag t-${s.raci}">${LBL[s.raci]}</span>
       </div>
     </div>`;
   }).join('');
@@ -855,421 +819,307 @@ function checkForm(){
   const ok=selectedOrg&&document.getElementById('adj-type').value&&document.getElementById('adj-date').value&&document.getElementById('adj-reason').value.trim();
   document.getElementById('submit-btn').disabled=!ok;
 }
+
 function doSubmit(){
   if(!selectedOrg)return;
-  const st=document.getElementById('wf-status');
-  st.textContent='审批中';st.style.cssText='background:#FFF7ED;color:#C2410C;border:1px solid rgba(224,120,32,.3);font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px;';
+  const st=document.getElementById('wf-status-tag');
+  st.textContent='审批中';st.style.cssText='font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px;background:#FFF7ED;color:#C2410C;border:1px solid rgba(224,120,32,.3)';
   alert(`✅ 审批单已提交！\n\n工作流编号：${wfno}\n目标组织：${selectedOrg.path}\n调整类型：${document.getElementById('adj-type').value}`);
 }
 
 // ══════════════════════════════════════════
-// ADMIN: TABS & DATA
+// ADMIN: TABS
 // ══════════════════════════════════════════
-function switchTab(tab, el) {
+function switchTab(tab,el){
   document.querySelectorAll('.a-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  currentTab = tab;
-  ['roles','rules','orgs','flow_fields'].forEach(p => {
-    document.getElementById('panel-'+p).style.display = tab===p ? 'flex' : 'none';
+  currentTab=tab;
+  ['roles','rules','orgs','flow_fields'].forEach(p=>{
+    const panel=document.getElementById('panel-'+p);
+    if(panel) panel.className='panel'+(tab===p?' active':'');
   });
   loadAdminData();
 }
 
-async function loadAdminData() {
-  if (currentTab==='roles') await loadRolesTable();
-  else if (currentTab==='rules') await loadRulesTable();
-  else if (currentTab==='orgs') await loadOrgsTable();
-  else if (currentTab==='flow_fields') await loadFlowFieldsTable();
+async function loadAdminData(){
+  if(currentTab==='roles') await loadRolesTable();
+  else if(currentTab==='rules') await loadRulesTable();
+  else if(currentTab==='orgs') await loadOrgsTable();
+  else if(currentTab==='flow_fields') await loadFFTable();
 }
 
-async function loadRolesTable() {
-  document.getElementById('roles-body').innerHTML = '<tr class="empty-row"><td colspan="9">加载中…</td></tr>';
-  const data = await sbGet('roles','limit=300');
-  await loadRoles(); // refresh map
-  const cnt = document.getElementById('roles-count');
-  if (cnt) cnt.textContent = `（${Array.isArray(data)?data.length:0} 个）`;
-  if (!Array.isArray(data)||!data.length) { document.getElementById('roles-body').innerHTML='<tr class="empty-row"><td colspan="9">暂无数据</td></tr>'; return; }
-  document.getElementById('roles-body').innerHTML = data.map(r=>`<tr>
+// ── 角色表 ──
+async function loadRolesTable(){
+  document.getElementById('roles-body').innerHTML='<tr class="empty-row"><td colspan="9">加载中…</td></tr>';
+  const d=await sbGet('roles','limit=300');
+  await loadRoles();
+  document.getElementById('roles-cnt').textContent=`（${Array.isArray(d)?d.length:0} 个）`;
+  if(!Array.isArray(d)||!d.length){document.getElementById('roles-body').innerHTML='<tr class="empty-row"><td colspan="9">暂无数据</td></tr>';return;}
+  document.getElementById('roles-body').innerHTML=d.map(r=>`<tr>
     <td><span class="td-level lv-${r.level}">${r.level||''}</span></td>
     <td><span class="td-key">${r.key}</span></td>
     <td>${r.name_cn||''}</td>
     <td style="color:var(--text3);font-size:11px">${r.name_en||''}</td>
     <td>${r.org_type||''}</td><td>${r.grp||''}</td><td>${r.person||''}</td>
     <td style="font-family:var(--mono);font-size:11px">${r.emp_id||''}</td>
-    <td><div class="row-actions">
-      <button class="row-btn" onclick='openRoleModal(${JSON.stringify(r)})'>编辑</button>
+    <td><div class="row-acts">
+      <button class="row-btn" onclick='openModal("roles",${JSON.stringify(r)})'>编辑</button>
       <button class="row-btn del" onclick="delRow('roles',${r.id})">删除</button>
     </div></td>
   </tr>`).join('');
 }
 
-async function loadRulesTable() {
-  document.getElementById('rules-body').innerHTML = '<tr class="empty-row"><td colspan="7">加载中…</td></tr>';
-  const raciFilter = document.getElementById('raci-filter').value;
-  const param = raciFilter ? `raci=eq.${raciFilter}&limit=300` : 'limit=500';
-  ALL_RULES = await sbGet('approval_rules', param+'&order=raci,order_num.desc');
-  FILTERED_RULES = ALL_RULES;
-  const cnt = document.getElementById('rules-count');
-  if (cnt) cnt.textContent = `（${Array.isArray(ALL_RULES)?ALL_RULES.length:0} 条）`;
-  renderRulesTable(FILTERED_RULES);
-}
+// ── 规则表（Excel样式，动态列）──
+async function loadRulesTable(){
+  document.getElementById('rules-body').innerHTML='<tr class="empty-row"><td colspan="10">加载中…</td></tr>';
+  const raci=document.getElementById('raci-filter').value;
+  const param=raci?`raci=eq.${raci}&limit=300`:'limit=500';
+  const d=await sbGet('approval_rules',param+'&order=raci,order_num.desc');
+  document.getElementById('rules-cnt').textContent=`（${Array.isArray(d)?d.length:0} 条）`;
+  if(!Array.isArray(d)||!d.length){document.getElementById('rules-body').innerHTML='<tr class="empty-row"><td colspan="10">暂无数据</td></tr>';return;}
 
-function applyRaciFilter() { loadRulesTable(); }
+  // 收集所有出现的条件key，动态生成列
+  const condKeys=new Set();
+  d.forEach(r=>Object.keys(r.conditions||{}).forEach(k=>condKeys.add(k)));
+  // 固定顺序
+  const keyOrder=['事项大类','流程类型','流程子类','组织级别','组织类型','所属区域','是否涉及敏感数据','数据量','是否涉及制度变更','是否存在前置审批单','跨部门','变更参数类型'];
+  const orderedKeys=[...keyOrder.filter(k=>condKeys.has(k)),...[...condKeys].filter(k=>!keyOrder.includes(k))];
 
-function renderRulesTable(data) {
-  if (!Array.isArray(data)||!data.length) { document.getElementById('rules-body').innerHTML='<tr class="empty-row"><td colspan="7">暂无数据</td></tr>'; return; }
-  document.getElementById('rules-body').innerHTML = data.map(r => {
-    const cond = r.conditions || {};
-    const chips = Object.entries(cond).map(([k,v])=>`<span class="cond-chip"><span class="ck">${k}</span>: ${v}</span>`).join('');
-    const role = ROLES_MAP[r.role_key] || {};
-    const raciCls = `raci-${r.raci}`;
+  // 表头
+  document.getElementById('rules-thead').innerHTML=`<tr>
+    <th>RACI</th><th>规则ID</th>
+    ${orderedKeys.map(k=>`<th>${k}</th>`).join('')}
+    <th>角色编码</th><th>角色名称</th><th>顺序</th><th>操作</th>
+  </tr>`;
+
+  // 表体
+  document.getElementById('rules-body').innerHTML=d.map(r=>{
+    const cond=r.conditions||{};
+    const role=ROLES_MAP[r.role_key]||{};
     return `<tr>
-      <td><span class="raci-tag ${raciCls}">${r.raci}</span></td>
+      <td><span class="raci-tag raci-${r.raci}">${r.raci}</span></td>
       <td><span class="td-key">${r.rule_id||''}</span></td>
-      <td><div class="cond-chips">${chips||'<span style="color:var(--text3);font-size:11px">无条件（全匹配）</span>'}</div></td>
+      ${orderedKeys.map(k=>`<td>${renderCondVal(cond[k])}</td>`).join('')}
       <td><span class="td-key">${r.role_key||''}</span></td>
       <td style="font-size:11px;color:var(--text2)">${role.name_cn||''}</td>
       <td style="color:var(--text3)">${r.order_num||0}</td>
-      <td><div class="row-actions">
-        <button class="row-btn" onclick='openRuleModal(${JSON.stringify(r)})'>编辑</button>
+      <td><div class="row-acts">
+        <button class="row-btn" onclick='openModal("rules",${JSON.stringify(r)})'>编辑</button>
         <button class="row-btn del" onclick="delRow('approval_rules',${r.id})">删除</button>
       </div></td>
     </tr>`;
   }).join('');
 }
 
-async function delRow(table, id) {
-  if (!confirm('确认删除？')) return;
-  await sbDel(table, id);
-  loadAdminData();
-  if (table==='orgs') await loadOrgs();
-  if (table==='flow_fields') await loadFlowFields();
+function renderCondVal(v){
+  if(v===undefined||v===null||v==='') return '<span class="cond-val cond-any">Any</span>';
+  if(typeof v==='string') return `<span class="cond-val cond-exact">${v}</span>`;
+  if(v.not) return `<span class="cond-val cond-not">NOT [${v.not.join(', ')}]</span>`;
+  if(v.in)  return `<span class="cond-val cond-in">[${v.in.join(', ')}]</span>`;
+  if(v.contains) return `<span class="cond-val cond-special">contains "${v.contains}"</span>`;
+  if(v.gte) return `<span class="cond-val cond-special">≥ ${v.gte}</span>`;
+  return `<span class="cond-val">${JSON.stringify(v)}</span>`;
 }
 
-async function loadOrgsTable() {
-  document.getElementById('orgs-body').innerHTML = '<tr class="empty-row"><td colspan="5">加载中…</td></tr>';
-  const data = await sbGet('orgs','order=id&limit=300');
-  const cnt = document.getElementById('orgs-count');
-  if (cnt) cnt.textContent = `（${Array.isArray(data)?data.length:0} 条）`;
-  if (!Array.isArray(data)||!data.length) {
-    document.getElementById('orgs-body').innerHTML='<tr class="empty-row"><td colspan="5">暂无数据</td></tr>'; return;
-  }
-  document.getElementById('orgs-body').innerHTML = data.map(r=>`<tr>
-    <td style="max-width:320px;word-break:break-all;font-size:12px">${r.path||''}</td>
-    <td>${r.type||''}</td>
-    <td>${r.grade||''}</td>
-    <td>${r.region||''}</td>
-    <td><div class="row-actions">
-      <button class="row-btn" onclick='openOrgModal(${JSON.stringify(r)})'>编辑</button>
+// ── 组织表 ──
+async function loadOrgsTable(){
+  document.getElementById('orgs-body').innerHTML='<tr class="empty-row"><td colspan="5">加载中…</td></tr>';
+  const d=await sbGet('orgs','order=id&limit=300');
+  document.getElementById('orgs-cnt').textContent=`（${Array.isArray(d)?d.length:0} 条）`;
+  if(!Array.isArray(d)||!d.length){document.getElementById('orgs-body').innerHTML='<tr class="empty-row"><td colspan="5">暂无数据</td></tr>';return;}
+  document.getElementById('orgs-body').innerHTML=d.map(r=>`<tr>
+    <td style="max-width:320px;font-size:12px;word-break:break-all">${r.path||''}</td>
+    <td>${r.type||''}</td><td>${r.grade||''}</td><td>${r.region||''}</td>
+    <td><div class="row-acts">
+      <button class="row-btn" onclick='openModal("orgs",${JSON.stringify(r)})'>编辑</button>
       <button class="row-btn del" onclick="delRow('orgs',${r.id})">删除</button>
     </div></td>
   </tr>`).join('');
 }
 
-async function loadFlowFieldsTable() {
-  document.getElementById('flow_fields-body').innerHTML = '<tr class="empty-row"><td colspan="7">加载中…</td></tr>';
-  const data = await sbGet('flow_fields','order=flow_key,sort_order&limit=300');
-  const cnt = document.getElementById('flow_fields-count');
-  if (cnt) cnt.textContent = `（${Array.isArray(data)?data.length:0} 条）`;
-  if (!Array.isArray(data)||!data.length) {
-    document.getElementById('flow_fields-body').innerHTML='<tr class="empty-row"><td colspan="7">暂无数据</td></tr>'; return;
-  }
-  const FLOW_LABELS = {org_adjust:'组织架构调整',pos_change:'岗位变更管理',attendance:'考勤管理',it_req:'系统需求管理',it_perm:'用户权限管理'};
-  document.getElementById('flow_fields-body').innerHTML = data.map(r=>{
-    const cfg = r.config||{};
-    const opts = cfg.options ? cfg.options.join(' / ') : '—';
+// ── 流程字段配置表 ──
+async function loadFFTable(){
+  document.getElementById('ff-body').innerHTML='<tr class="empty-row"><td colspan="7">加载中…</td></tr>';
+  const d=await sbGet('flow_fields','order=flow_key,sort_order&limit=300');
+  document.getElementById('ff-cnt').textContent=`（${Array.isArray(d)?d.length:0} 条）`;
+  if(!Array.isArray(d)||!d.length){document.getElementById('ff-body').innerHTML='<tr class="empty-row"><td colspan="7">暂无数据</td></tr>';return;}
+  const FL={org_adjust:'组织架构调整',pos_change:'岗位变更管理',attendance:'考勤管理',it_req:'系统需求管理',it_perm:'用户权限管理'};
+  document.getElementById('ff-body').innerHTML=d.map(r=>{
+    const cfg=r.config||{};
     return `<tr>
-      <td><span class="td-key">${r.flow_key}</span><br><span style="font-size:10px;color:var(--text3)">${FLOW_LABELS[r.flow_key]||''}</span></td>
+      <td><span class="td-key">${r.flow_key}</span><br><span style="font-size:10px;color:var(--text3)">${FL[r.flow_key]||''}</span></td>
       <td><span class="td-key">${r.field_key}</span></td>
       <td>${cfg.label||''}</td>
       <td><span style="font-size:11px;padding:2px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border)">${cfg.type||'select'}</span></td>
-      <td style="font-size:11px;color:var(--text2);max-width:200px">${opts}</td>
+      <td style="font-size:11px;color:var(--text2)">${(cfg.options||[]).join(' / ')||'—'}</td>
       <td style="color:var(--text3)">${r.sort_order}</td>
-      <td><div class="row-actions">
-        <button class="row-btn" onclick='openFlowFieldModal(${JSON.stringify(r)})'>编辑</button>
+      <td><div class="row-acts">
+        <button class="row-btn" onclick='openModal("flow_fields",${JSON.stringify(r)})'>编辑</button>
         <button class="row-btn del" onclick="delRow('flow_fields',${r.id})">删除</button>
       </div></td>
     </tr>`;
   }).join('');
 }
 
-// ══════════════════════════════════════════
-// MODAL: ROLES
-// ══════════════════════════════════════════
-function openRoleModal(row=null) {
-  modalMode = 'roles';
-  editingId = row ? row.id : null;
-  document.getElementById('modal-title').textContent = row ? '编辑角色' : '新增角色';
-  document.getElementById('modal-sub').textContent = '角色是审批链中的参与者定义';
-  document.getElementById('modal-form').innerHTML = `
-    <div class="modal-grid">
-      <div class="modal-field"><div class="modal-lbl">水位层</div>
-        <select class="modal-input" id="m-level">
-          <option>战略层</option><option>规划层</option><option>管控层</option><option>运执层</option><option>通用层</option><option>系统层</option>
-        </select>
-      </div>
-      <div class="modal-field"><div class="modal-lbl">角色编码 (key)</div><input class="modal-input" id="m-key" value="${row?.key||''}" placeholder="如 STR_HR_OWNER" /></div>
-      <div class="modal-field"><div class="modal-lbl">中文名称</div><input class="modal-input" id="m-name_cn" value="${row?.name_cn||''}" /></div>
-      <div class="modal-field"><div class="modal-lbl">英文名称</div><input class="modal-input" id="m-name_en" value="${row?.name_en||''}" /></div>
-      <div class="modal-field"><div class="modal-lbl">组织类型</div><input class="modal-input" id="m-org_type" value="${row?.org_type||''}" /></div>
-      <div class="modal-field"><div class="modal-lbl">族群</div><input class="modal-input" id="m-grp" value="${row?.grp||''}" /></div>
-      <div class="modal-field full"><div class="modal-lbl">角色描述</div><input class="modal-input" id="m-role_desc" value="${row?.role_desc||''}" /></div>
-      <div class="modal-field"><div class="modal-lbl">负责人姓名</div><input class="modal-input" id="m-person" value="${row?.person||''}" /></div>
-      <div class="modal-field"><div class="modal-lbl">工号</div><input class="modal-input" id="m-emp_id" value="${row?.emp_id||''}" /></div>
-    </div>`;
-  if (row) setTimeout(()=>{ document.getElementById('m-level').value = row.level||'战略层'; }, 10);
-  document.getElementById('modal-overlay').classList.add('open');
+async function delRow(table,id){
+  if(!confirm('确认删除？'))return;
+  await sbDel(table,id);
+  loadAdminData();
+  if(table==='orgs'){await loadOrgs();renderOrgChips();}
+  if(table==='flow_fields') await loadFlowFields();
+  if(table==='roles') await loadRoles();
 }
 
 // ══════════════════════════════════════════
-// MODAL: RULES (JSON条件编辑器)
+// MODAL
 // ══════════════════════════════════════════
-function openRuleModal(row=null) {
-  modalMode = 'rules';
-  editingId = row ? row.id : null;
-  document.getElementById('modal-title').textContent = row ? '编辑审批规则' : '新增审批规则';
-  document.getElementById('modal-sub').textContent = '条件字段完全灵活，可以增加任意维度';
+function openModal(mode, row=null){
+  modalMode=mode; editingId=row?row.id:null;
+  const titles={roles:row?'编辑角色':'新增角色',rules:row?'编辑审批规则':'新增审批规则',orgs:row?'编辑组织':'新增组织',flow_fields:row?'编辑流程字段':'新增流程字段'};
+  const subs={roles:'角色是审批链中的参与者',rules:'conditions里所有条件都满足才带出该角色',orgs:'组织属性用于匹配审批链条件',flow_fields:'field_key必须和审批规则conditions里的key一致'};
+  document.getElementById('modal-title').textContent=titles[mode];
+  document.getElementById('modal-sub').textContent=subs[mode];
 
-  const existConds = row?.conditions || {};
-  const condRows = Object.entries(existConds).length > 0
-    ? Object.entries(existConds).map(([k,v]) => condRowHTML(k,v)).join('')
-    : condRowHTML('L3','') + condRowHTML('L5','') + condRowHTML('区域','');
+  if(mode==='roles') renderRoleForm(row);
+  else if(mode==='rules') renderRuleForm(row);
+  else if(mode==='orgs') renderOrgForm(row);
+  else if(mode==='flow_fields') renderFFForm(row);
 
-  document.getElementById('modal-form').innerHTML = `
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function renderRoleForm(r){
+  document.getElementById('modal-body').innerHTML=`
     <div class="modal-grid">
-      <div class="modal-field"><div class="modal-lbl">规则ID</div><input class="modal-input" id="m-rule_id" value="${row?.rule_id||''}" placeholder="如 HR_ORG_SET_01" /></div>
-      <div class="modal-field"><div class="modal-lbl">RACI 类型</div>
-        <select class="modal-input" id="m-raci">
-          <option value="R">R · 发起人</option><option value="A">A · 批准人</option><option value="C">C · 咨询人</option><option value="I">I · 知会人</option>
-        </select>
-      </div>
-      <div class="modal-field"><div class="modal-lbl">角色编码 (role_key)</div><input class="modal-input" id="m-role_key" value="${row?.role_key||''}" placeholder="从角色库复制 key" /></div>
-      <div class="modal-field"><div class="modal-lbl">排序顺序</div><input class="modal-input" type="number" id="m-order_num" value="${row?.order_num||0}" /></div>
+      <div class="mf"><div class="mf-lbl">水位层</div><select class="mi" id="m-level"><option>战略层</option><option>规划层</option><option>管控层</option><option>运执层</option><option>通用层</option><option>系统层</option></select></div>
+      <div class="mf"><div class="mf-lbl">角色编码</div><input class="mi" id="m-key" value="${r?.key||''}" placeholder="如 STR_HR_OWNER"/></div>
+      <div class="mf"><div class="mf-lbl">中文名称</div><input class="mi" id="m-name_cn" value="${r?.name_cn||''}"/></div>
+      <div class="mf"><div class="mf-lbl">英文名称</div><input class="mi" id="m-name_en" value="${r?.name_en||''}"/></div>
+      <div class="mf"><div class="mf-lbl">组织类型</div><input class="mi" id="m-org_type" value="${r?.org_type||''}"/></div>
+      <div class="mf"><div class="mf-lbl">族群</div><input class="mi" id="m-grp" value="${r?.grp||''}"/></div>
+      <div class="mf full"><div class="mf-lbl">描述</div><input class="mi" id="m-role_desc" value="${r?.role_desc||''}"/></div>
+      <div class="mf"><div class="mf-lbl">负责人</div><input class="mi" id="m-person" value="${r?.person||''}"/></div>
+      <div class="mf"><div class="mf-lbl">工号</div><input class="mi" id="m-emp_id" value="${r?.emp_id||''}"/></div>
+    </div>`;
+  if(r) setTimeout(()=>{document.getElementById('m-level').value=r.level||'战略层';},10);
+}
+
+function renderRuleForm(r){
+  const conds=r?.conditions||{};
+  const condRows=Object.entries(conds).length>0
+    ?Object.entries(conds).map(([k,v])=>condRowHTML(k,typeof v==='string'?v:JSON.stringify(v))).join('')
+    :condRowHTML('组织级别','')+condRowHTML('组织类型','')+condRowHTML('所属区域','');
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-grid">
+      <div class="mf"><div class="mf-lbl">规则ID</div><input class="mi" id="m-rule_id" value="${r?.rule_id||''}" placeholder="如 HR_ORG_SET_01"/></div>
+      <div class="mf"><div class="mf-lbl">RACI</div><select class="mi" id="m-raci"><option value="R">R · 发起人</option><option value="A">A · 批准人</option><option value="C">C · 咨询人</option><option value="I">I · 知会人</option></select></div>
+      <div class="mf"><div class="mf-lbl">角色编码</div><input class="mi" id="m-role_key" value="${r?.role_key||''}" placeholder="从角色库复制"/></div>
+      <div class="mf"><div class="mf-lbl">排序顺序</div><input class="mi" type="number" id="m-order_num" value="${r?.order_num||0}"/></div>
     </div>
-
-    <div class="modal-section">匹配条件（JSON 键值对）</div>
+    <div class="modal-section">匹配条件（所有条件都满足才命中）</div>
     <div class="cond-editor">
-      <div class="cond-editor-head">
-        <span class="cond-editor-lbl">条件列表</span>
-        <button class="add-cond-btn" onclick="addCondRow()">＋ 添加条件</button>
-      </div>
+      <div class="cond-editor-head"><span class="cond-editor-lbl">条件列表</span><button class="add-cond-btn" onclick="addCond()">＋ 添加条件</button></div>
       <div class="cond-rows" id="cond-rows">${condRows}</div>
-      <div class="cond-hint">
+      <div class="cond-hint-box">
         <strong>条件值写法：</strong><br>
-        · 精确匹配：<code>三级组织</code> · 包含列表：<code>["一级组织","二级组织"]</code><br>
-        · 排除列表：<code>not ["运营"]</code> · 通配（不填或删除该条件）
+        精确：<code>三级组织</code> &nbsp; 包含：<code>["一级组织","二级组织"]</code> &nbsp; 排除：<code>not ["运营"]</code><br>
+        区域包含：<code>{"contains":"华东"}</code> &nbsp; 数值：<code>{"gte":10000}</code> &nbsp; 通配：留空
       </div>
     </div>`;
-
-  if (row) setTimeout(()=>{ document.getElementById('m-raci').value = row.raci||'R'; }, 10);
-  document.getElementById('modal-overlay').classList.add('open');
+  if(r) setTimeout(()=>{document.getElementById('m-raci').value=r.raci||'R';},10);
 }
 
-function condRowHTML(key='', val='') {
+function condRowHTML(k='',v=''){
   return `<div class="cond-row">
-    <input class="cond-row-key" placeholder="条件名称，如 L3 / 区域 / 是否涉及敏感" value="${key}" />
-    <input class="cond-row-val" placeholder="条件值，如 三级组织 / 中国区" value="${val}" />
-    <button class="cond-del" onclick="this.closest('.cond-row').remove()" title="删除">×</button>
+    <input class="cr-key" placeholder="条件key，如 组织级别" value="${k}"/>
+    <input class="cr-val" placeholder="条件值，如 三级组织" value="${v}"/>
+    <button class="cr-del" onclick="this.closest('.cond-row').remove()">×</button>
   </div>`;
 }
+function addCond(){const rows=document.getElementById('cond-rows');const d=document.createElement('div');d.innerHTML=condRowHTML();rows.appendChild(d.firstElementChild);}
 
-function addCondRow() {
-  const rows = document.getElementById('cond-rows');
-  const div = document.createElement('div');
-  div.innerHTML = condRowHTML();
-  rows.appendChild(div.firstElementChild);
-}
-
-function getConditions() {
-  const conds = {};
-  document.querySelectorAll('#cond-rows .cond-row').forEach(row => {
-    const k = row.querySelector('.cond-row-key').value.trim();
-    const v = row.querySelector('.cond-row-val').value.trim();
-    if (k && v) conds[k] = v;
+function getConds(){
+  const conds={};
+  document.querySelectorAll('#cond-rows .cond-row').forEach(row=>{
+    const k=row.querySelector('.cr-key').value.trim();
+    const v=row.querySelector('.cr-val').value.trim();
+    if(!k||!v)return;
+    try{conds[k]=JSON.parse(v);}catch(e){conds[k]=v;}
   });
   return conds;
 }
 
-// ══════════════════════════════════════════
-// MODAL: ORGS
-// ══════════════════════════════════════════
-function openOrgModal(row=null) {
-  modalMode = 'orgs';
-  editingId = row ? row.id : null;
-  document.getElementById('modal-title').textContent = row ? '编辑组织' : '新增组织';
-  document.getElementById('modal-sub').textContent = '组织信息决定审批链中区域和层级的匹配';
-  document.getElementById('modal-form').innerHTML = `
+function renderOrgForm(r){
+  document.getElementById('modal-body').innerHTML=`
     <div class="modal-grid">
-      <div class="modal-field full">
-        <div class="modal-lbl">部门全称（path）</div>
-        <input class="modal-input" id="m-path" value="${row?.path||''}" placeholder="如 COO2 / 模切BG / BU6" />
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">组织类型</div>
-        <select class="modal-input" id="m-type">
-          <option>运营</option><option>职能</option><option>商务</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">组织层级</div>
-        <select class="modal-input" id="m-grade">
-          <option>一级组织</option><option>二级组织</option><option>三级组织</option>
-          <option>四级组织</option><option>五级及以下组织</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">所属区域</div>
-        <select class="modal-input" id="m-region">
-          <option>中国区</option><option>国际区</option><option>华东区</option><option>集团总部</option>
-        </select>
-      </div>
+      <div class="mf full"><div class="mf-lbl">部门全称（path）</div><input class="mi" id="m-path" value="${r?.path||''}" placeholder="如 COO2 / 模切BG / BU6"/></div>
+      <div class="mf"><div class="mf-lbl">组织类型</div><select class="mi" id="m-type"><option>运营</option><option>职能</option><option>商务</option></select></div>
+      <div class="mf"><div class="mf-lbl">组织层级</div><select class="mi" id="m-grade"><option>一级组织</option><option>二级组织</option><option>三级组织</option><option>四级组织</option><option>五级及以下组织</option></select></div>
+      <div class="mf"><div class="mf-lbl">所属区域</div><select class="mi" id="m-region"><option>中国区</option><option>国际区</option><option>华东区</option><option>集团总部</option></select></div>
     </div>`;
-  if (row) {
-    setTimeout(()=>{
-      document.getElementById('m-type').value = row.type||'运营';
-      document.getElementById('m-grade').value = row.grade||'一级组织';
-      document.getElementById('m-region').value = row.region||'中国区';
-    }, 10);
-  }
-  document.getElementById('modal-overlay').classList.add('open');
+  if(r) setTimeout(()=>{
+    document.getElementById('m-type').value=r.type||'运营';
+    document.getElementById('m-grade').value=r.grade||'一级组织';
+    document.getElementById('m-region').value=r.region||'中国区';
+  },10);
 }
 
-// ══════════════════════════════════════════
-// MODAL: FLOW FIELDS
-// ══════════════════════════════════════════
-function openFlowFieldModal(row=null) {
-  modalMode = 'flow_fields';
-  editingId = row ? row.id : null;
-  document.getElementById('modal-title').textContent = row ? '编辑流程字段' : '新增流程字段';
-  document.getElementById('modal-sub').textContent = 'field_key 必须和审批规则 conditions 里的 key 完全一致';
-  const cfg = row?.config || {};
-  const optsStr = cfg.options ? JSON.stringify(cfg.options) : '[]';
-  document.getElementById('modal-form').innerHTML = `
+function renderFFForm(r){
+  const cfg=r?.config||{};
+  document.getElementById('modal-body').innerHTML=`
     <div class="modal-grid">
-      <div class="modal-field">
-        <div class="modal-lbl">流程 key</div>
-        <select class="modal-input" id="m-flow_key">
+      <div class="mf"><div class="mf-lbl">流程key</div>
+        <select class="mi" id="m-flow_key">
           <option value="org_adjust">org_adjust（组织架构调整）</option>
           <option value="pos_change">pos_change（岗位变更管理）</option>
           <option value="attendance">attendance（考勤管理）</option>
           <option value="it_req">it_req（系统需求管理）</option>
           <option value="it_perm">it_perm（用户权限管理）</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">条件 key（field_key）</div>
-        <input class="modal-input" id="m-field_key" value="${row?.field_key||''}" placeholder="如 L3 / is_sensitive" />
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">显示问题（label）</div>
-        <input class="modal-input" id="m-label" value="${cfg.label||''}" placeholder="如 申请范围是？" />
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">字段类型（type）</div>
-        <select class="modal-input" id="m-ftype">
-          <option value="select">select（下拉选项）</option>
-          <option value="number">number（数字输入）</option>
-          <option value="text">text（文本输入）</option>
-        </select>
-      </div>
-      <div class="modal-field full">
-        <div class="modal-lbl">选项列表（options，JSON数组）</div>
-        <input class="modal-input" id="m-options" value='${optsStr}' placeholder='["选项A","选项B","选项C"]' />
-        <div class="modal-hint">type=select 时填写，格式：["全集团","跨部门","部门内"]</div>
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">占位提示（placeholder）</div>
-        <input class="modal-input" id="m-placeholder" value="${cfg.placeholder||''}" />
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">排序顺序</div>
-        <input class="modal-input" type="number" id="m-sort_order" value="${row?.sort_order||0}" />
-      </div>
-      <div class="modal-field">
-        <div class="modal-lbl">是否必填</div>
-        <select class="modal-input" id="m-required">
-          <option value="false">否</option><option value="true">是</option>
-        </select>
-      </div>
+        </select></div>
+      <div class="mf"><div class="mf-lbl">条件key（field_key）</div><input class="mi" id="m-fkey" value="${r?.field_key||''}" placeholder="如 流程子类 / 是否涉及敏感数据"/></div>
+      <div class="mf"><div class="mf-lbl">显示问题（label）</div><input class="mi" id="m-label" value="${cfg.label||''}" placeholder="如 申请范围是？"/></div>
+      <div class="mf"><div class="mf-lbl">字段类型</div><select class="mi" id="m-ftype"><option value="select">select（下拉）</option><option value="number">number（数字）</option><option value="text">text（文本）</option></select></div>
+      <div class="mf full"><div class="mf-lbl">选项列表（JSON数组，type=select时填）</div>
+        <input class="mi" id="m-options" value='${JSON.stringify(cfg.options||[])}' placeholder='["全集团","跨部门","部门内"]'/>
+        <div class="mf-hint">格式：["选项A","选项B"]</div></div>
+      <div class="mf"><div class="mf-lbl">占位提示</div><input class="mi" id="m-placeholder" value="${cfg.placeholder||''}"/></div>
+      <div class="mf"><div class="mf-lbl">排序顺序</div><input class="mi" type="number" id="m-sort_order" value="${r?.sort_order||0}"/></div>
+      <div class="mf"><div class="mf-lbl">是否必填</div><select class="mi" id="m-required"><option value="false">否</option><option value="true">是</option></select></div>
     </div>`;
-  if (row) {
-    setTimeout(()=>{
-      document.getElementById('m-flow_key').value = row.flow_key||'org_adjust';
-      document.getElementById('m-ftype').value = cfg.type||'select';
-      document.getElementById('m-required').value = cfg.required ? 'true' : 'false';
-    }, 10);
-  }
-  document.getElementById('modal-overlay').classList.add('open');
+  if(r) setTimeout(()=>{
+    document.getElementById('m-flow_key').value=r.flow_key||'org_adjust';
+    document.getElementById('m-ftype').value=cfg.type||'select';
+    document.getElementById('m-required').value=cfg.required?'true':'false';
+  },10);
 }
 
-// ══════════════════════════════════════════
-// MODAL SAVE
-// ══════════════════════════════════════════
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-function closeModalOutside(e) { if(e.target===document.getElementById('modal-overlay')) closeModal(); }
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
 
-async function saveModal() {
-  let body = {};
-  if (modalMode === 'roles') {
-    body = {
-      level: document.getElementById('m-level').value,
-      key: document.getElementById('m-key').value.trim(),
-      name_cn: document.getElementById('m-name_cn').value.trim(),
-      name_en: document.getElementById('m-name_en').value.trim(),
-      org_type: document.getElementById('m-org_type').value.trim(),
-      grp: document.getElementById('m-grp').value.trim(),
-      role_desc: document.getElementById('m-role_desc').value.trim(),
-      person: document.getElementById('m-person').value.trim(),
-      emp_id: document.getElementById('m-emp_id').value.trim(),
-    };
-    if (editingId) await sbPatch('roles', editingId, body);
-    else await sbPost('roles', body);
-    await loadRolesTable(); await loadRoles();
-
-  } else if (modalMode === 'orgs') {
-    body = {
-      path: document.getElementById('m-path').value.trim(),
-      type: document.getElementById('m-type').value,
-      grade: document.getElementById('m-grade').value,
-      region: document.getElementById('m-region').value,
-    };
-    if (editingId) await sbPatch('orgs', editingId, body);
-    else await sbPost('orgs', body);
-    await loadOrgsTable(); await loadOrgs();
-    renderOrgChips(); // 刷新发起页的组织chips
-
-  } else if (modalMode === 'flow_fields') {
-    let options = [];
-    try { options = JSON.parse(document.getElementById('m-options').value || '[]'); } catch(e) {}
-    body = {
-      flow_key: document.getElementById('m-flow_key').value,
-      field_key: document.getElementById('m-field_key').value.trim(),
-      sort_order: parseInt(document.getElementById('m-sort_order').value)||0,
-      config: {
-        label: document.getElementById('m-label').value.trim(),
-        type: document.getElementById('m-ftype').value,
-        options: options,
-        placeholder: document.getElementById('m-placeholder').value.trim(),
-        required: document.getElementById('m-required').value === 'true',
-      }
-    };
-    if (editingId) await sbPatch('flow_fields', editingId, body);
-    else await sbPost('flow_fields', body);
-    await loadFlowFieldsTable(); await loadFlowFields();
-
-  } else {
-    body = {
-      rule_id: document.getElementById('m-rule_id').value.trim(),
-      raci: document.getElementById('m-raci').value,
-      conditions: getConditions(),
-      role_key: document.getElementById('m-role_key').value.trim(),
-      order_num: parseInt(document.getElementById('m-order_num').value)||0,
-    };
-    if (editingId) await sbPatch('approval_rules', editingId, body);
-    else await sbPost('approval_rules', body);
-    await loadRulesTable();
+async function saveModal(){
+  let body={},table='';
+  if(modalMode==='roles'){
+    table='roles';
+    body={level:document.getElementById('m-level').value,key:document.getElementById('m-key').value.trim(),name_cn:document.getElementById('m-name_cn').value.trim(),name_en:document.getElementById('m-name_en').value.trim(),org_type:document.getElementById('m-org_type').value.trim(),grp:document.getElementById('m-grp').value.trim(),role_desc:document.getElementById('m-role_desc').value.trim(),person:document.getElementById('m-person').value.trim(),emp_id:document.getElementById('m-emp_id').value.trim()};
+  } else if(modalMode==='rules'){
+    table='approval_rules';
+    body={rule_id:document.getElementById('m-rule_id').value.trim(),raci:document.getElementById('m-raci').value,conditions:getConds(),role_key:document.getElementById('m-role_key').value.trim(),order_num:parseInt(document.getElementById('m-order_num').value)||0};
+    ALL_RULES=[];// 清缓存
+  } else if(modalMode==='orgs'){
+    table='orgs';
+    body={path:document.getElementById('m-path').value.trim(),type:document.getElementById('m-type').value,grade:document.getElementById('m-grade').value,region:document.getElementById('m-region').value};
+  } else if(modalMode==='flow_fields'){
+    table='flow_fields';
+    let opts=[];try{opts=JSON.parse(document.getElementById('m-options').value||'[]');}catch(e){}
+    body={flow_key:document.getElementById('m-flow_key').value,field_key:document.getElementById('m-fkey').value.trim(),sort_order:parseInt(document.getElementById('m-sort_order').value)||0,config:{label:document.getElementById('m-label').value.trim(),type:document.getElementById('m-ftype').value,options:opts,placeholder:document.getElementById('m-placeholder').value.trim(),required:document.getElementById('m-required').value==='true'}};
   }
+  if(editingId) await sbPatch(table,editingId,body);
+  else await sbPost(table,body);
   closeModal();
+  await loadAdminData();
+  if(modalMode==='orgs'){await loadOrgs();renderOrgChips();}
+  if(modalMode==='flow_fields') await loadFlowFields();
+  if(modalMode==='roles') await loadRoles();
 }
 
 // ══════════════════════════════════════════
