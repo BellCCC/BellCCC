@@ -374,6 +374,12 @@ select.modal-input{cursor:pointer}
               <div class="od-field full"><div class="od-lbl">组织路径</div><div class="od-val muted wrap" id="f-path">—</div></div>
             </div>
           </div>
+          <!-- 流程额外条件（发起人填写） -->
+          <div class="card" id="extra-fields-card" style="display:none">
+            <div class="card-head"><div class="ch-bar"></div><div class="ch-title">补充条件</div><div class="ch-badge b-orange">请填写</div></div>
+            <div class="adj-grid" id="extra-fields-body" style="padding:12px;display:flex;flex-direction:column;gap:12px"></div>
+          </div>
+
           <div class="card">
             <div class="card-head"><div class="ch-bar"></div><div class="ch-title">调整内容</div><div class="ch-badge b-orange">必填</div></div>
             <div class="adj-grid">
@@ -434,6 +440,8 @@ select.modal-input{cursor:pointer}
         <div class="admin-tabs">
           <div class="a-tab active" onclick="switchTab('roles',this)">角色库</div>
           <div class="a-tab" onclick="switchTab('rules',this)">审批规则</div>
+          <div class="a-tab" onclick="switchTab('orgs',this)">组织管理</div>
+          <div class="a-tab" onclick="switchTab('flow_fields',this)">流程字段配置</div>
         </div>
         <div class="admin-body">
 
@@ -480,6 +488,37 @@ select.modal-input{cursor:pointer}
                   </tr>
                 </thead>
                 <tbody id="rules-body"><tr class="empty-row"><td colspan="7">加载中…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 组织管理 -->
+          <div id="panel-orgs" style="display:none;flex-direction:column;gap:16px">
+            <div class="panel-head">
+              <div class="panel-title">组织管理 <span id="orgs-count"></span></div>
+              <button class="add-btn" onclick="openOrgModal()">＋ 新增组织</button>
+            </div>
+            <div class="data-table">
+              <table>
+                <thead><tr><th>部门全称（path）</th><th>组织类型</th><th>组织层级</th><th>所属区域</th><th>操作</th></tr></thead>
+                <tbody id="orgs-body"><tr class="empty-row"><td colspan="5">加载中…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 流程字段配置 -->
+          <div id="panel-flow_fields" style="display:none;flex-direction:column;gap:16px">
+            <div class="panel-head">
+              <div class="panel-title">流程字段配置 <span id="flow_fields-count"></span></div>
+              <button class="add-btn" onclick="openFlowFieldModal()">＋ 新增字段</button>
+            </div>
+            <div style="background:var(--blue-lt);border:1px solid var(--blue-bd);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:#1E40AF;line-height:1.6;margin-bottom:4px">
+              配置每个流程需要发起人额外填写的条件。<strong>field_key</strong> 必须和审批规则 conditions 里的 key 完全一致。config 是 JSON 格式，支持 type: select / number / text。
+            </div>
+            <div class="data-table">
+              <table>
+                <thead><tr><th>流程key</th><th>条件key</th><th>显示问题</th><th>类型</th><th>选项/配置</th><th>顺序</th><th>操作</th></tr></thead>
+                <tbody id="flow_fields-body"><tr class="empty-row"><td colspan="7">加载中…</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -531,6 +570,8 @@ const sbDel  = (t,id)   => sbFetch(t+'?id=eq.'+id,{method:'DELETE',prefer:'retur
 let ROLES_MAP = {};
 let ALL_RULES = [];
 let FILTERED_RULES = [];
+let FLOW_FIELDS_MAP = {}; // { flow_key: [field配置...] }
+let extraContext = {};    // 发起人填写的额外条件
 let selectedKey = null, openGroups = new Set(['人事类']), wfno = '', selectedOrg = null;
 let modalMode = null, editingId = null;
 let currentTab = 'roles';
@@ -553,9 +594,20 @@ const CATALOG = [
 // INIT
 // ══════════════════════════════════════════
 async function init() {
-  await Promise.all([loadRoles(), loadOrgs()]);
+  await Promise.all([loadRoles(), loadOrgs(), loadFlowFields()]);
   renderCatalog();
   renderOrgChips();
+}
+
+async function loadFlowFields() {
+  const data = await sbGet('flow_fields', 'order=flow_key,sort_order&limit=200');
+  FLOW_FIELDS_MAP = {};
+  if (Array.isArray(data)) {
+    data.forEach(f => {
+      if (!FLOW_FIELDS_MAP[f.flow_key]) FLOW_FIELDS_MAP[f.flow_key] = [];
+      FLOW_FIELDS_MAP[f.flow_key].push(f);
+    });
+  }
 }
 
 async function loadOrgs() {
@@ -606,6 +658,7 @@ function renderCatalog(filter='') {
 function toggleGroup(name,el){if(openGroups.has(name))openGroups.delete(name);else openGroups.add(name);renderCatalog();}
 function selectItem(key,name){
   selectedKey=key;
+  extraContext = {}; // 重置额外条件
   document.getElementById('proceed-btn').disabled=false;
   document.getElementById('proceed-btn').innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg> 发起「${name}」`;
   document.getElementById('intent-strip').style.display='flex';
@@ -668,7 +721,64 @@ function selectOrg(org,el){
   document.getElementById('org-badge').textContent=last;
   const set=(id,val)=>{const e=document.getElementById(id);e.textContent=val;e.classList.remove('muted');};
   set('f-type',org.type);set('f-region',org.region);set('f-grade',org.grade);set('f-path',org.path);
+  renderExtraFields();
   renderChain(org);checkForm();
+}
+
+// ── 动态渲染发起人额外条件 ────────────────────
+function renderExtraFields() {
+  const card = document.getElementById('extra-fields-card');
+  const body = document.getElementById('extra-fields-body');
+  const fields = FLOW_FIELDS_MAP[selectedKey] || [];
+
+  if (!fields.length || !selectedOrg) {
+    card.style.display = 'none';
+    extraContext = {};
+    return;
+  }
+
+  card.style.display = 'block';
+  body.innerHTML = fields.map(f => {
+    const cfg = f.config || {};
+    const label = cfg.label || f.field_key;
+    const type = cfg.type || 'select';
+    const required = cfg.required ? '<span class="req">*</span>' : '';
+
+    if (type === 'select') {
+      const options = (cfg.options || []).map(o =>
+        `<option value="${o}">${o}</option>`
+      ).join('');
+      return `<div class="adj-field full">
+        <div class="adj-lbl">${label}${required}</div>
+        <select class="adj-input" data-fkey="${f.field_key}" onchange="updateExtraContext(this)">
+          <option value="">请选择</option>${options}
+        </select>
+      </div>`;
+    }
+    if (type === 'number') {
+      return `<div class="adj-field full">
+        <div class="adj-lbl">${label}${required}</div>
+        <input type="number" class="adj-input" data-fkey="${f.field_key}"
+          placeholder="${cfg.placeholder||''}" oninput="updateExtraContext(this)" />
+      </div>`;
+    }
+    return `<div class="adj-field full">
+      <div class="adj-lbl">${label}${required}</div>
+      <input type="text" class="adj-input" data-fkey="${f.field_key}"
+        placeholder="${cfg.placeholder||''}" oninput="updateExtraContext(this)" />
+    </div>`;
+  }).join('');
+
+  extraContext = {};
+}
+
+function updateExtraContext(el) {
+  const key = el.dataset.fkey;
+  const val = el.value.trim();
+  if (val) extraContext[key] = val;
+  else delete extraContext[key];
+  // 条件变了，重新计算审批链
+  if (selectedOrg) renderChain(selectedOrg);
 }
 
 // ── JSON条件匹配引擎 ────────────────────────
@@ -709,8 +819,8 @@ async function renderChain(org) {
     return;
   }
 
-  // 调用 engine.js 的主函数
-  const steps = computeChain(org, selectedKey, rules);
+  // 调用 engine.js 的主函数，合并 org 固定属性 + 发起人填写的额外条件
+  const steps = computeChain(org, selectedKey, rules, extraContext);
 
   document.getElementById('cp-steps').textContent = `共 ${steps.length} 步`;
 
@@ -759,14 +869,17 @@ function switchTab(tab, el) {
   document.querySelectorAll('.a-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   currentTab = tab;
-  document.getElementById('panel-roles').style.display = tab==='roles'?'flex':'none';
-  document.getElementById('panel-rules').style.display = tab==='rules'?'flex':'none';
+  ['roles','rules','orgs','flow_fields'].forEach(p => {
+    document.getElementById('panel-'+p).style.display = tab===p ? 'flex' : 'none';
+  });
   loadAdminData();
 }
 
 async function loadAdminData() {
   if (currentTab==='roles') await loadRolesTable();
-  else await loadRulesTable();
+  else if (currentTab==='rules') await loadRulesTable();
+  else if (currentTab==='orgs') await loadOrgsTable();
+  else if (currentTab==='flow_fields') await loadFlowFieldsTable();
 }
 
 async function loadRolesTable() {
@@ -829,6 +942,55 @@ async function delRow(table, id) {
   if (!confirm('确认删除？')) return;
   await sbDel(table, id);
   loadAdminData();
+  if (table==='orgs') await loadOrgs();
+  if (table==='flow_fields') await loadFlowFields();
+}
+
+async function loadOrgsTable() {
+  document.getElementById('orgs-body').innerHTML = '<tr class="empty-row"><td colspan="5">加载中…</td></tr>';
+  const data = await sbGet('orgs','order=id&limit=300');
+  const cnt = document.getElementById('orgs-count');
+  if (cnt) cnt.textContent = `（${Array.isArray(data)?data.length:0} 条）`;
+  if (!Array.isArray(data)||!data.length) {
+    document.getElementById('orgs-body').innerHTML='<tr class="empty-row"><td colspan="5">暂无数据</td></tr>'; return;
+  }
+  document.getElementById('orgs-body').innerHTML = data.map(r=>`<tr>
+    <td style="max-width:320px;word-break:break-all;font-size:12px">${r.path||''}</td>
+    <td>${r.type||''}</td>
+    <td>${r.grade||''}</td>
+    <td>${r.region||''}</td>
+    <td><div class="row-actions">
+      <button class="row-btn" onclick='openOrgModal(${JSON.stringify(r)})'>编辑</button>
+      <button class="row-btn del" onclick="delRow('orgs',${r.id})">删除</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+async function loadFlowFieldsTable() {
+  document.getElementById('flow_fields-body').innerHTML = '<tr class="empty-row"><td colspan="7">加载中…</td></tr>';
+  const data = await sbGet('flow_fields','order=flow_key,sort_order&limit=300');
+  const cnt = document.getElementById('flow_fields-count');
+  if (cnt) cnt.textContent = `（${Array.isArray(data)?data.length:0} 条）`;
+  if (!Array.isArray(data)||!data.length) {
+    document.getElementById('flow_fields-body').innerHTML='<tr class="empty-row"><td colspan="7">暂无数据</td></tr>'; return;
+  }
+  const FLOW_LABELS = {org_adjust:'组织架构调整',pos_change:'岗位变更管理',attendance:'考勤管理',it_req:'系统需求管理',it_perm:'用户权限管理'};
+  document.getElementById('flow_fields-body').innerHTML = data.map(r=>{
+    const cfg = r.config||{};
+    const opts = cfg.options ? cfg.options.join(' / ') : '—';
+    return `<tr>
+      <td><span class="td-key">${r.flow_key}</span><br><span style="font-size:10px;color:var(--text3)">${FLOW_LABELS[r.flow_key]||''}</span></td>
+      <td><span class="td-key">${r.field_key}</span></td>
+      <td>${cfg.label||''}</td>
+      <td><span style="font-size:11px;padding:2px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border)">${cfg.type||'select'}</span></td>
+      <td style="font-size:11px;color:var(--text2);max-width:200px">${opts}</td>
+      <td style="color:var(--text3)">${r.sort_order}</td>
+      <td><div class="row-actions">
+        <button class="row-btn" onclick='openFlowFieldModal(${JSON.stringify(r)})'>编辑</button>
+        <button class="row-btn del" onclick="delRow('flow_fields',${r.id})">删除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
@@ -929,6 +1091,118 @@ function getConditions() {
 }
 
 // ══════════════════════════════════════════
+// MODAL: ORGS
+// ══════════════════════════════════════════
+function openOrgModal(row=null) {
+  modalMode = 'orgs';
+  editingId = row ? row.id : null;
+  document.getElementById('modal-title').textContent = row ? '编辑组织' : '新增组织';
+  document.getElementById('modal-sub').textContent = '组织信息决定审批链中区域和层级的匹配';
+  document.getElementById('modal-form').innerHTML = `
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <div class="modal-lbl">部门全称（path）</div>
+        <input class="modal-input" id="m-path" value="${row?.path||''}" placeholder="如 COO2 / 模切BG / BU6" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">组织类型</div>
+        <select class="modal-input" id="m-type">
+          <option>运营</option><option>职能</option><option>商务</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">组织层级</div>
+        <select class="modal-input" id="m-grade">
+          <option>一级组织</option><option>二级组织</option><option>三级组织</option>
+          <option>四级组织</option><option>五级及以下组织</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">所属区域</div>
+        <select class="modal-input" id="m-region">
+          <option>中国区</option><option>国际区</option><option>华东区</option><option>集团总部</option>
+        </select>
+      </div>
+    </div>`;
+  if (row) {
+    setTimeout(()=>{
+      document.getElementById('m-type').value = row.type||'运营';
+      document.getElementById('m-grade').value = row.grade||'一级组织';
+      document.getElementById('m-region').value = row.region||'中国区';
+    }, 10);
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// ══════════════════════════════════════════
+// MODAL: FLOW FIELDS
+// ══════════════════════════════════════════
+function openFlowFieldModal(row=null) {
+  modalMode = 'flow_fields';
+  editingId = row ? row.id : null;
+  document.getElementById('modal-title').textContent = row ? '编辑流程字段' : '新增流程字段';
+  document.getElementById('modal-sub').textContent = 'field_key 必须和审批规则 conditions 里的 key 完全一致';
+  const cfg = row?.config || {};
+  const optsStr = cfg.options ? JSON.stringify(cfg.options) : '[]';
+  document.getElementById('modal-form').innerHTML = `
+    <div class="modal-grid">
+      <div class="modal-field">
+        <div class="modal-lbl">流程 key</div>
+        <select class="modal-input" id="m-flow_key">
+          <option value="org_adjust">org_adjust（组织架构调整）</option>
+          <option value="pos_change">pos_change（岗位变更管理）</option>
+          <option value="attendance">attendance（考勤管理）</option>
+          <option value="it_req">it_req（系统需求管理）</option>
+          <option value="it_perm">it_perm（用户权限管理）</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">条件 key（field_key）</div>
+        <input class="modal-input" id="m-field_key" value="${row?.field_key||''}" placeholder="如 L3 / is_sensitive" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">显示问题（label）</div>
+        <input class="modal-input" id="m-label" value="${cfg.label||''}" placeholder="如 申请范围是？" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">字段类型（type）</div>
+        <select class="modal-input" id="m-ftype">
+          <option value="select">select（下拉选项）</option>
+          <option value="number">number（数字输入）</option>
+          <option value="text">text（文本输入）</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <div class="modal-lbl">选项列表（options，JSON数组）</div>
+        <input class="modal-input" id="m-options" value='${optsStr}' placeholder='["选项A","选项B","选项C"]' />
+        <div class="modal-hint">type=select 时填写，格式：["全集团","跨部门","部门内"]</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">占位提示（placeholder）</div>
+        <input class="modal-input" id="m-placeholder" value="${cfg.placeholder||''}" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">排序顺序</div>
+        <input class="modal-input" type="number" id="m-sort_order" value="${row?.sort_order||0}" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-lbl">是否必填</div>
+        <select class="modal-input" id="m-required">
+          <option value="false">否</option><option value="true">是</option>
+        </select>
+      </div>
+    </div>`;
+  if (row) {
+    setTimeout(()=>{
+      document.getElementById('m-flow_key').value = row.flow_key||'org_adjust';
+      document.getElementById('m-ftype').value = cfg.type||'select';
+      document.getElementById('m-required').value = cfg.required ? 'true' : 'false';
+    }, 10);
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// ══════════════════════════════════════════
 // MODAL SAVE
 // ══════════════════════════════════════════
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
@@ -950,8 +1224,39 @@ async function saveModal() {
     };
     if (editingId) await sbPatch('roles', editingId, body);
     else await sbPost('roles', body);
-    await loadRolesTable();
-    await loadRoles();
+    await loadRolesTable(); await loadRoles();
+
+  } else if (modalMode === 'orgs') {
+    body = {
+      path: document.getElementById('m-path').value.trim(),
+      type: document.getElementById('m-type').value,
+      grade: document.getElementById('m-grade').value,
+      region: document.getElementById('m-region').value,
+    };
+    if (editingId) await sbPatch('orgs', editingId, body);
+    else await sbPost('orgs', body);
+    await loadOrgsTable(); await loadOrgs();
+    renderOrgChips(); // 刷新发起页的组织chips
+
+  } else if (modalMode === 'flow_fields') {
+    let options = [];
+    try { options = JSON.parse(document.getElementById('m-options').value || '[]'); } catch(e) {}
+    body = {
+      flow_key: document.getElementById('m-flow_key').value,
+      field_key: document.getElementById('m-field_key').value.trim(),
+      sort_order: parseInt(document.getElementById('m-sort_order').value)||0,
+      config: {
+        label: document.getElementById('m-label').value.trim(),
+        type: document.getElementById('m-ftype').value,
+        options: options,
+        placeholder: document.getElementById('m-placeholder').value.trim(),
+        required: document.getElementById('m-required').value === 'true',
+      }
+    };
+    if (editingId) await sbPatch('flow_fields', editingId, body);
+    else await sbPost('flow_fields', body);
+    await loadFlowFieldsTable(); await loadFlowFields();
+
   } else {
     body = {
       rule_id: document.getElementById('m-rule_id').value.trim(),
